@@ -16,7 +16,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        HomeFetcher.fetchAllRooms() {[weak self]  (rooms, error) in
+        HomeFetcher.fetchRooms() {[weak self]  (rooms, error) in
             if let error = error {
                 print("Error: \(error)")
             } else if let rooms = rooms {

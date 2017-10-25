@@ -1,81 +1,95 @@
 //
-//  RoomsTableViewController.swift
+//  DevicesTableViewController.swift
 //  HomeCenter
 //
-//  Created by Christopher Slade on 10/24/17.
+//  Created by Christopher Slade on 10/25/17.
 //  Copyright © 2017 Christopher Slade. All rights reserved.
 //
 
 import UIKit
 import CoreData
 
-class RoomsTableViewController: FetchedResultsTableViewController {
-
+class DevicesTableViewController: FetchedResultsTableViewController {
+    
     // MARK: Public API
     
     var container: NSPersistentContainer? = (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer {
         didSet { updateUI() }
     }
     
-    // MARK: Lifecycle Methods and data
+    var room: Room? {
+        didSet { updateUI() }
+    }
     
-    private var fetchedResultsController: NSFetchedResultsController<Room>? {
+    // MARK: Lifecycle Methods and Data
+    
+    private var fetchedResultsController: NSFetchedResultsController<Device>? {
         didSet {
             do {
                 if let frc = fetchedResultsController {
                     frc.delegate = self
                     try frc.performFetch()
                 }
-                tableView.reloadData()
             } catch {
-                self.presentErrorAlert(with: "Fetched results controller error")
+                self.presentErrorAlert(with: "Fetched Results Controller Error")
                 print("FetchedResultsController perform failed: \(error)")
             }
         }
     }
     
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        refreshRooms()
+        refreshDevices()
         updateUI()
+        // Uncomment the following line to preserve selection between presentations
+        // self.clearsSelectionOnViewWillAppear = false
+
+        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
+        // self.navigationItem.rightBarButtonItem = self.editButtonItem
     }
-    
+
     // MARK: UI
     
-    private func updateUI() {
+    @IBAction func refreshRequested(_ sender: UIRefreshControl) {
+        refreshDevices()
+    }
+    
+    func updateUI() {
+        print("Updating UI")
+        self.title = "Devices"
         if let context = container?.viewContext {
-            let request: NSFetchRequest<Room> = Room.fetchRequest()
+            let request: NSFetchRequest<Device> = Device.fetchRequest()
+            if let rm = room {
+                self.title = rm.name ?? "Room Devices"
+                request.predicate = NSPredicate(format: "room = %@", rm)
+            }
             request.sortDescriptors = [NSSortDescriptor(
                 key: "name",
                 ascending: true,
                 selector: #selector(NSString.localizedCaseInsensitiveCompare(_:))
-            )]
-            fetchedResultsController = NSFetchedResultsController<Room>(
+                )]
+            fetchedResultsController = NSFetchedResultsController<Device>(
                 fetchRequest: request,
                 managedObjectContext: context,
                 sectionNameKeyPath: nil,
                 cacheName: nil
             )
-            
         }
-    }
-    
-    @IBAction func refreshRequested(_ sender: UIRefreshControl) {
-        refreshRooms()
     }
     
     // MARK: API Data Management
     
-    private func refreshRooms() {
+    private func refreshDevices() {
         self.refreshControl?.beginRefreshing()
-        HomeFetcher.fetchRooms { [weak self] (jsonData, error) in
+        HomeFetcher.fetchDevices { [weak self] (jsonData, error) in
             if let error = error {
                 print("Error: \(error)")
                 self?.presentErrorAlert(with: "Error downloading data from API")
-            } else if let roomsData = jsonData {
-                self?.updateDatabase(with: roomsData)
+            } else if let devicesData = jsonData {
+                self?.updateDatabase(with: devicesData)
             } else {
-                self?.presentErrorAlert(with: "Didn't fetch any rooms")
+                self?.presentErrorAlert(with: "Didn't fetch any devices")
                 print("HomeFetcher didn't error or return a result - Why?")
             }
             DispatchQueue.main.async {
@@ -84,21 +98,20 @@ class RoomsTableViewController: FetchedResultsTableViewController {
         }
     }
     
-    
-    private func updateDatabase(with rooms: [Any]) {
+    private func updateDatabase(with devicesData: [Any]) {
         let context = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
-        context.parent = container?.viewContext //makes sure viewContext gets notified about changes, so the fetched result controller will update.
+        context.parent = container?.viewContext
         context.perform { [weak self] in
-            for room in rooms {
-                if let roomData = room as? [String: Any] {
-                    _ = try? Room.findOrCreateRoom(matching: roomData, in: context)
-                }
-            }
             do {
+                for device in devicesData {
+                    if let deviceData = device as? [String: Any] {
+                        _ = try Device.findOrCreateDevice(matching: deviceData, in: context)
+                    }
+                }
                 try context.save()
                 print("Context Saved")
             } catch {
-                print("Error Saving Context: \(error)")
+                print("Error creating or saving context: \(error)")
             }
             self?.printDBStats()
         }
@@ -106,48 +119,44 @@ class RoomsTableViewController: FetchedResultsTableViewController {
     
     private func printDBStats() {
         if let context = container?.viewContext {
-            context.perform { 
-                if let roomCount = try? context.count(for: Room.fetchRequest()) {
-                    print("\(roomCount) rooms")
+            context.perform {
+                if let deviceCount = try? context.count(for: Device.fetchRequest()) {
+                    print("\(deviceCount) devices")
+                }
+                let request: NSFetchRequest<Device> = Device.fetchRequest()
+                if let matches = try? context.fetch(request) {
+                    for device in matches {
+                        if device.room != nil {
+                            print("\(device.name!):\(device.room!.name!)")
+                        } else {
+                            print ("\(device.name!) no room")
+                        }
+                    }
                 }
             }
         }
     }
     
-    //MARK: UITableViewDataSource
+    // MARKL UITableViewDataSource
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: Storyboard.RoomCell, for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: Storyboard.DeviceCell, for: indexPath)
         
-        if let room = fetchedResultsController?.object(at: indexPath) {
-            cell.textLabel?.text = room.name ?? "<No Name>"
+        if let device = fetchedResultsController?.object(at: indexPath) {
+            cell.textLabel?.text = device.name ?? "<No Name>"
         }
         
         return cell
     }
-    
-    // MARK: Navigation
-    
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == Storyboard.DeviceSegue, let cell = sender as? UITableViewCell {
-            if let devicesTVC = segue.destination as? DevicesTableViewController {
-                if let indexPath = tableView.indexPath(for: cell) {
-                    print("Setting room")
-                    devicesTVC.room = fetchedResultsController?.object(at: indexPath)
-                }
-            }
-         }
-    }
-    
-    private struct Storyboard {
-        static let RoomCell = "Room Cell"
-        static let DeviceSegue = "Show Room Devices"
-    }
-    
 
+    private struct Storyboard {
+        static let DeviceCell = "Device Cell"
+    }
+    
 }
 
-extension RoomsTableViewController
+
+extension DevicesTableViewController
 {
     // MARK: UITableViewDataSource
     

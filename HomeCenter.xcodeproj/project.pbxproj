@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		541134351F9FFC9600D67920 /* APIInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 541134341F9FFC9600D67920 /* APIInfo.swift */; };
 		545E030A1F9FD9CE008FDE18 /* FetchedResultsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 545E03091F9FD9CE008FDE18 /* FetchedResultsTableViewController.swift */; };
+		5465AA261FA10983000E47CD /* DevicesTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5465AA251FA10983000E47CD /* DevicesTableViewController.swift */; };
 		54802C691F9E58E3005FF2C7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54802C681F9E58E3005FF2C7 /* AppDelegate.swift */; };
 		54802C6B1F9E58E3005FF2C7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54802C6A1F9E58E3005FF2C7 /* ViewController.swift */; };
 		54802C6E1F9E58E3005FF2C7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 54802C6C1F9E58E3005FF2C7 /* Main.storyboard */; };
@@ -25,6 +26,7 @@
 /* Begin PBXFileReference section */
 		541134341F9FFC9600D67920 /* APIInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIInfo.swift; sourceTree = "<group>"; };
 		545E03091F9FD9CE008FDE18 /* FetchedResultsTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchedResultsTableViewController.swift; sourceTree = "<group>"; };
+		5465AA251FA10983000E47CD /* DevicesTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicesTableViewController.swift; sourceTree = "<group>"; };
 		54802C651F9E58E3005FF2C7 /* HomeCenter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HomeCenter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		54802C681F9E58E3005FF2C7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		54802C6A1F9E58E3005FF2C7 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -71,6 +73,7 @@
 			isa = PBXGroup;
 			children = (
 				54FF29A01F9FDBB500584EB8 /* RoomsTableViewController.swift */,
+				5465AA251FA10983000E47CD /* DevicesTableViewController.swift */,
 				54FF29A21F9FDE3900584EB8 /* UIViewControllerUtilities.swift */,
 				54802C6A1F9E58E3005FF2C7 /* ViewController.swift */,
 				54802C6C1F9E58E3005FF2C7 /* Main.storyboard */,
@@ -185,6 +188,7 @@
 				54802C7E1F9E64C1005FF2C7 /* Room.swift in Sources */,
 				545E030A1F9FD9CE008FDE18 /* FetchedResultsTableViewController.swift in Sources */,
 				54802C691F9E58E3005FF2C7 /* AppDelegate.swift in Sources */,
+				5465AA261FA10983000E47CD /* DevicesTableViewController.swift in Sources */,
 				54802C811F9E69EA005FF2C7 /* Device.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

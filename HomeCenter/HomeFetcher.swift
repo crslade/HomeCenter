@@ -8,16 +8,27 @@
 
 import UIKit
 
-class HomeFetcher: NSObject {
-    static let API_KEY = APIInfo.API_KEY
+class HomeFetcher: NSObject
+{
+    private static let API_KEY = APIInfo.API_KEY
     
-    struct paths {
-        static let base = APIInfo.API_PATH
-        static let rooms = "/rooms"
+  
+    class func fetchRooms(completionHandler: @escaping ([Any]?, Error?) -> Void) {
+        let urlString = "\(APIInfo.API_PATH)/rooms"
+        fetchArray(for: urlString, with: completionHandler)
     }
     
-    class func fetchAllRooms(completionHandler: @escaping ([Any]?, Error?) -> Void) {
-        let urlString = paths.base+paths.rooms
+    class func fetchDevices(for roomUUID: String, completionHandler: @escaping ([Any]?, Error?) -> Void) {
+        let urlString = "\(APIInfo.API_PATH)/rooms/\(roomUUID)/devices"
+        fetchArray(for: urlString, with: completionHandler)
+    }
+    
+    class func fetchDevices(completionHandler: @escaping ([Any]?, Error?) -> Void) {
+        let urlString = "\(APIInfo.API_PATH)/devices"
+        fetchArray(for: urlString, with: completionHandler)
+    }
+    
+    private class func fetchArray(for urlString: String, with completionHandler: @escaping ([Any]?, Error?) -> Void) {
         guard let url = URL(string: urlString) else {
             print("Could not form url")
             completionHandler(nil,HomeFetcherError.URLError("Could not create URL"))
@@ -25,8 +36,7 @@ class HomeFetcher: NSObject {
         }
         var request = URLRequest(url: url)
         request.setValue(API_KEY, forHTTPHeaderField: "X-API-KEY")
-        let session = URLSession(configuration: .ephemeral)
-        (session.dataTask(with: request) { (data, response, error) in
+        (URLSession.shared.dataTask(with: request) { (data, response, error) in
             if let error = error {
                 completionHandler(nil,error)
             } else if let _ = response, let data = data {
@@ -44,7 +54,6 @@ class HomeFetcher: NSObject {
                 completionHandler(nil,HomeFetcherError.DownloadError("Unknown Error"))
             }
         }).resume()
-
     }
 
 }

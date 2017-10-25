@@ -9,7 +9,8 @@
 import UIKit
 import CoreData
 
-class Room: NSManagedObject {
+class Room: NSManagedObject
+{
     
     class func findOrCreateRoom(matching roomData: [String: Any], in context: NSManagedObjectContext) throws -> Room? {
         guard let uuid = roomData[jsonKeys.uuid] as? String else {
@@ -40,6 +41,23 @@ class Room: NSManagedObject {
         }
         
         return room
+    }
+    
+    class func findRoom(with uuid: String, in context: NSManagedObjectContext) throws -> Room? {
+        let request: NSFetchRequest<Room> = Room.fetchRequest()
+        request.predicate = NSPredicate(format: "uuid = %@", uuid)
+        
+        do {
+            let matches = try context.fetch(request)
+            if matches.count > 0 {
+                assert(matches.count == 1, "Room.findOrCreateRoom - database inconsistency")
+               return matches[0]
+            } else {
+                return nil
+            }
+        } catch {
+            throw error
+        }
     }
     
     private struct jsonKeys {
