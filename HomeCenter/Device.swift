@@ -41,7 +41,6 @@ class Device: NSManagedObject
             device.updated_at = formatter.date(from: dateString)
         }
         do {
-            print("\(deviceData[jsonKeys.roomID])")
             if let roomID = deviceData[jsonKeys.roomID] as? String {
                print("\(roomID)")
                 if let room = try Room.findRoom(with: roomID, in: context) {

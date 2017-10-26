@@ -27,6 +27,7 @@ class Room: NSManagedObject
                 assert(matches.count == 1, "Room.findOrCreateRoom - database inconsistency")
                 room = matches[0]
             } else {
+                print("Creating new")
                 room = Room(context: context)
                 room.uuid = uuid
             }

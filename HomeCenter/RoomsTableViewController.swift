@@ -19,6 +19,8 @@ class RoomsTableViewController: FetchedResultsTableViewController {
     
     // MARK: Lifecycle Methods and data
     
+    private var needsAPIKeys: Bool = false
+    
     private var fetchedResultsController: NSFetchedResultsController<Room>? {
         didSet {
             do {
@@ -28,7 +30,7 @@ class RoomsTableViewController: FetchedResultsTableViewController {
                 }
                 tableView.reloadData()
             } catch {
-                self.presentErrorAlert(with: "Fetched results controller error")
+                self.presentErrorAlert(withMessage: "Fetched results controller error")
                 print("FetchedResultsController perform failed: \(error)")
             }
         }
@@ -36,8 +38,20 @@ class RoomsTableViewController: FetchedResultsTableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        refreshRooms()
+        if HomeFetcher.APIvaluesSet() {
+            refreshRooms()
+        } else {
+            print("No API Key/URL Set")
+            needsAPIKeys = true //Remeber to segue to get APIKeys in viewDidAppear
+        }
         updateUI()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if needsAPIKeys {
+            performSegue(withIdentifier: Storyboard.APISegue, sender: self)
+        }
     }
     
     // MARK: UI
@@ -71,11 +85,11 @@ class RoomsTableViewController: FetchedResultsTableViewController {
         HomeFetcher.fetchRooms { [weak self] (jsonData, error) in
             if let error = error {
                 print("Error: \(error)")
-                self?.presentErrorAlert(with: "Error downloading data from API")
+                self?.presentErrorAlert(withMessage: "Error downloading data from API")
             } else if let roomsData = jsonData {
                 self?.updateDatabase(with: roomsData)
             } else {
-                self?.presentErrorAlert(with: "Didn't fetch any rooms")
+                self?.presentErrorAlert(withMessage: "Didn't fetch any rooms")
                 print("HomeFetcher didn't error or return a result - Why?")
             }
             DispatchQueue.main.async {
@@ -86,9 +100,7 @@ class RoomsTableViewController: FetchedResultsTableViewController {
     
     
     private func updateDatabase(with rooms: [Any]) {
-        let context = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
-        context.parent = container?.viewContext //makes sure viewContext gets notified about changes, so the fetched result controller will update.
-        context.perform { [weak self] in
+        container?.performBackgroundTask { [weak self] context in
             for room in rooms {
                 if let roomData = room as? [String: Any] {
                     _ = try? Room.findOrCreateRoom(matching: roomData, in: context)
@@ -121,6 +133,8 @@ class RoomsTableViewController: FetchedResultsTableViewController {
         
         if let room = fetchedResultsController?.object(at: indexPath) {
             cell.textLabel?.text = room.name ?? "<No Name>"
+            let deviceCount = room.devices?.count ?? 0
+            cell.detailTextLabel?.text = (deviceCount == 1) ? "\(deviceCount) device" : "\(deviceCount) devices"
         }
         
         return cell
@@ -137,11 +151,21 @@ class RoomsTableViewController: FetchedResultsTableViewController {
                 }
             }
          }
+        //Nothing needs to be done to prepare for API Info Segue
+    }
+    
+    @IBAction func unwindFromInfo(segue: UIStoryboardSegue) {
+        if let settingsVC = segue.source as? APIInfoViewController {
+            print("Coming back with url = \(settingsVC.apiUrl):\(settingsVC.apiKey)")
+            needsAPIKeys = false
+            refreshRooms()
+        }
     }
     
     private struct Storyboard {
         static let RoomCell = "Room Cell"
         static let DeviceSegue = "Show Room Devices"
+        static let APISegue = "Get API Info"
     }
     
 

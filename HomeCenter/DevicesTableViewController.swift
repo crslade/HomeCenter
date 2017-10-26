@@ -31,7 +31,7 @@ class DevicesTableViewController: FetchedResultsTableViewController {
                     try frc.performFetch()
                 }
             } catch {
-                self.presentErrorAlert(with: "Fetched Results Controller Error")
+                self.presentErrorAlert(withMessage: "Fetched Results Controller Error")
                 print("FetchedResultsController perform failed: \(error)")
             }
         }
@@ -85,11 +85,11 @@ class DevicesTableViewController: FetchedResultsTableViewController {
         HomeFetcher.fetchDevices { [weak self] (jsonData, error) in
             if let error = error {
                 print("Error: \(error)")
-                self?.presentErrorAlert(with: "Error downloading data from API")
+                self?.presentErrorAlert(withMessage: "Error downloading data from API")
             } else if let devicesData = jsonData {
                 self?.updateDatabase(with: devicesData)
             } else {
-                self?.presentErrorAlert(with: "Didn't fetch any devices")
+                self?.presentErrorAlert(withMessage: "Didn't fetch any devices")
                 print("HomeFetcher didn't error or return a result - Why?")
             }
             DispatchQueue.main.async {
@@ -99,9 +99,7 @@ class DevicesTableViewController: FetchedResultsTableViewController {
     }
     
     private func updateDatabase(with devicesData: [Any]) {
-        let context = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
-        context.parent = container?.viewContext
-        context.perform { [weak self] in
+        container?.performBackgroundTask { [weak self] context in
             do {
                 for device in devicesData {
                     if let deviceData = device as? [String: Any] {
@@ -123,20 +121,10 @@ class DevicesTableViewController: FetchedResultsTableViewController {
                 if let deviceCount = try? context.count(for: Device.fetchRequest()) {
                     print("\(deviceCount) devices")
                 }
-                let request: NSFetchRequest<Device> = Device.fetchRequest()
-                if let matches = try? context.fetch(request) {
-                    for device in matches {
-                        if device.room != nil {
-                            print("\(device.name!):\(device.room!.name!)")
-                        } else {
-                            print ("\(device.name!) no room")
-                        }
-                    }
-                }
             }
         }
     }
-    
+
     // MARKL UITableViewDataSource
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -144,6 +132,7 @@ class DevicesTableViewController: FetchedResultsTableViewController {
         
         if let device = fetchedResultsController?.object(at: indexPath) {
             cell.textLabel?.text = device.name ?? "<No Name>"
+            cell.detailTextLabel?.text = device.room?.name ?? ""
         }
         
         return cell
