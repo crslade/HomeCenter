@@ -9,17 +9,22 @@
 import UIKit
 import CoreData
 
-class RoomsTableViewController: FetchedResultsTableViewController {
+class RoomsTableViewController: FetchedResultsTableViewController, UISplitViewControllerDelegate {
 
-    // MARK: Public API
+    // MARK: - Public API
     
     var container: NSPersistentContainer? = (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer {
         didSet { updateUI() }
     }
     
-    // MARK: Lifecycle Methods and data
+    // MARK: - Lifecycle Methods and data
     
     private var needsAPIKeys: Bool = false
+    
+    private lazy var backgroundContext: NSManagedObjectContext? = {
+        [weak self] in
+            return container?.newBackgroundContext()
+        }()
     
     private var fetchedResultsController: NSFetchedResultsController<Room>? {
         didSet {
@@ -45,6 +50,14 @@ class RoomsTableViewController: FetchedResultsTableViewController {
             needsAPIKeys = true //Remeber to segue to get APIKeys in viewDidAppear
         }
         updateUI()
+        // Enable Editing
+        self.navigationItem.rightBarButtonItem = self.editButtonItem
+        //Make myself the split view controllers delagate.
+        if let nvc = self.parent as? UINavigationController, let svc = nvc.parent as? UISplitViewController {
+            svc.delegate = self
+        } else {
+            print("Can't find svc")
+        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -78,19 +91,23 @@ class RoomsTableViewController: FetchedResultsTableViewController {
         refreshRooms()
     }
     
-    // MARK: API Data Management
+    // MARK: - API Data Management
     
     private func refreshRooms() {
         self.refreshControl?.beginRefreshing()
         HomeFetcher.fetchRooms { [weak self] (jsonData, error) in
             if let error = error {
                 print("Error: \(error)")
-                self?.presentErrorAlert(withMessage: "Error downloading data from API")
+                DispatchQueue.main.async {
+                    self?.presentErrorAlert(withMessage: "Error downloading data from API")
+                }
             } else if let roomsData = jsonData {
                 self?.updateDatabase(with: roomsData)
             } else {
-                self?.presentErrorAlert(withMessage: "Didn't fetch any rooms")
                 print("HomeFetcher didn't error or return a result - Why?")
+                DispatchQueue.main.async {
+                    self?.presentErrorAlert(withMessage: "Didn't fetch any rooms")
+                }
             }
             DispatchQueue.main.async {
                 self?.refreshControl?.endRefreshing()
@@ -101,11 +118,23 @@ class RoomsTableViewController: FetchedResultsTableViewController {
     
     private func updateDatabase(with rooms: [Any]) {
         container?.performBackgroundTask { [weak self] context in
+            var uuidArray: [String] = [] //check for any deleted rooms.
             for room in rooms {
                 if let roomData = room as? [String: Any] {
-                    _ = try? Room.findOrCreateRoom(matching: roomData, in: context)
+                    var newRoom: Room?
+                    do {
+                        newRoom = try Room.findOrCreateRoom(matching: roomData, in: context)
+                    } catch {
+                        DispatchQueue.main.async {
+                            self?.presentErrorAlert(withMessage: "Couldn't create room.")
+                        }
+                    }
+                    if let uuid = newRoom?.uuid {
+                        uuidArray.append(uuid)
+                    }
                 }
             }
+            self?.deleteMissingRooms(from: uuidArray, in: context)
             do {
                 try context.save()
                 print("Context Saved")
@@ -113,6 +142,20 @@ class RoomsTableViewController: FetchedResultsTableViewController {
                 print("Error Saving Context: \(error)")
             }
             self?.printDBStats()
+        }
+    }
+    
+    private func deleteMissingRooms(from uuids: [String], in context: NSManagedObjectContext) {
+        context.performAndWait { //already in background
+            let request: NSFetchRequest<Room> = Room.fetchRequest()
+            if let matches = try? context.fetch(request) {
+                for room in matches {
+                    if let uuid = room.uuid, !uuids.contains(uuid) {
+                        print("Extra room: \(room.name!), removing")
+                        context.delete(room)
+                    }
+                }
+            }
         }
     }
     
@@ -126,7 +169,7 @@ class RoomsTableViewController: FetchedResultsTableViewController {
         }
     }
     
-    //MARK: UITableViewDataSource
+    //MARK: - UITableViewDataSource
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: Storyboard.RoomCell, for: indexPath)
@@ -140,7 +183,60 @@ class RoomsTableViewController: FetchedResultsTableViewController {
         return cell
     }
     
-    // MARK: Navigation
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        return true
+    }
+    
+    override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+        let editRowAction = UITableViewRowAction(style: .default, title: "Edit") {[weak self] (action, indexPath) in
+            self?.editRow(at: indexPath)
+        }
+        editRowAction.backgroundColor = .blue
+        let deleteRowAction = UITableViewRowAction(style: .destructive, title: "Delete") {[weak self] (action, indexPath) in
+            self?.deleteRow(at: indexPath)
+        }
+        
+        return [deleteRowAction, editRowAction]
+    }
+    
+    
+    // MARK: - TableViewAction Handlers
+    
+    func editRow(at indexPath: IndexPath) {
+        print("Edit Row")
+        if let room = fetchedResultsController?.object(at: indexPath) {
+            performSegue(withIdentifier: Storyboard.AddEditRoomSegue, sender: room)
+        }
+    }
+    
+    func deleteRow(at indexPath: IndexPath) {
+        print("Delete Row")
+        if let context = backgroundContext, let mainRoom = fetchedResultsController?.object(at: indexPath), let uuid = mainRoom.uuid {
+            let room = context.object(with: mainRoom.objectID)
+            HomeFetcher.deleteRoom(withUUID: uuid, with: { (error) in
+                if let error = error {
+                    print("Error Deleting room: \(error)")
+                    DispatchQueue.main.async {
+                        self.presentErrorAlert(withMessage: "Couldn't send changes to API.")
+                    }
+                } else {
+                    context.perform {
+                        context.delete(room)
+                        do {
+                            try context.save()
+                        } catch {
+                            print("Error saving context: \(error)")
+                            DispatchQueue.main.async {
+                                self.presentErrorAlert(withMessage: "Couldn't save changes locally.")
+                            }
+                        }
+                    }
+                }
+            })
+        }
+    }
+    
+    // MARK: - Navigation
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == Storyboard.DeviceSegue, let cell = sender as? UITableViewCell {
@@ -150,23 +246,68 @@ class RoomsTableViewController: FetchedResultsTableViewController {
                     devicesTVC.room = fetchedResultsController?.object(at: indexPath)
                 }
             }
-         }
-        //Nothing needs to be done to prepare for API Info Segue
+        }
+        if segue.identifier == Storyboard.AddEditRoomSegue, let dvc = segue.destination.contentViewController as? EditRoomViewController {
+            if let room = sender as? Room, let context = backgroundContext, let editRoom = context.object(with: room.objectID) as? Room {
+               dvc.room = editRoom
+            } else if let context = backgroundContext {
+                dvc.room = Room(context: context)
+            }
+        }
     }
     
     @IBAction func unwindFromInfo(segue: UIStoryboardSegue) {
-        if let settingsVC = segue.source as? APIInfoViewController {
-            print("Coming back with url = \(settingsVC.apiUrl):\(settingsVC.apiKey)")
+        if let _ = segue.source as? APIInfoViewController {
             needsAPIKeys = false
             refreshRooms()
         }
+    }
+    
+    @IBAction func cancelEditRoom(segue: UIStoryboardSegue) {
+        print("Canceled Add/Edit")
+        backgroundContext?.reset()
+    }
+    
+    @IBAction func doneEditRoom(segue: UIStoryboardSegue) {
+        print("Done Adding/Editing Room")
+        if let svc = segue.source as? EditRoomViewController, let room = svc.room {
+            room.saveToAPI(with: { [weak self] (error) in
+                if let error = error {
+                    print ("Error saving edit to API: \(error)")
+                    DispatchQueue.main.async {
+                        self?.presentErrorAlert(withMessage: "Error Saving Changes to API.")
+                    }
+                } else {
+                    self?.backgroundContext?.perform {
+                        do {
+                            try self?.backgroundContext?.save()
+                        } catch {
+                            print("Error saving context: \(error)")
+                            DispatchQueue.main.async {
+                                self?.presentErrorAlert(withMessage: "Error saving changes locally.")
+                            }
+                        }
+                    }
+                }
+            })
+        }
+    }
+    
+    // MARK: - UISplitViewControllerDelegate
+    
+    //Makes it show masterVC instead of detail
+    func splitViewController(_ splitViewController: UISplitViewController, collapseSecondary secondaryViewController: UIViewController, onto primaryViewController: UIViewController) -> Bool {
+        return true
     }
     
     private struct Storyboard {
         static let RoomCell = "Room Cell"
         static let DeviceSegue = "Show Room Devices"
         static let APISegue = "Get API Info"
+        static let AddEditRoomSegue = "Add Edit Room"
     }
+    
+    
     
 
 }

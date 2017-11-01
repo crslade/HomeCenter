@@ -38,6 +38,11 @@ class KeychainAccess {
         setPasscode(for: KeychainIdentifiers.APIUrl, with: apiUrl)
     }
     
+    class func clearAPIValues() {
+        deletePasscode(identifier: KeychainIdentifiers.APIKey)
+        deletePasscode(identifier: KeychainIdentifiers.APIUrl)
+    }
+    
     private struct KeychainIdentifiers {
         static let APIKey = "X-API-KEY"
         static let APIUrl = "API-URL"

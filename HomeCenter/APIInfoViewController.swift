@@ -10,7 +10,7 @@ import UIKit
 
 class APIInfoViewController: UIViewController, UITextFieldDelegate {
 
-    // MARK: PublicAPI
+    // MARK: - PublicAPI
     
     var apiKey: String?
     var apiUrl: String?
@@ -21,7 +21,7 @@ class APIInfoViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var apiUrlTextField: UITextField! { didSet { apiUrlTextField.delegate = self }}
     @IBOutlet weak var apiKeyTextField: UITextField! { didSet { apiKeyTextField.delegate = self }}
     
-    // MARK: Lifecycle Methods
+    // MARK: - Lifecycle Methods
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,7 +33,7 @@ class APIInfoViewController: UIViewController, UITextFieldDelegate {
         apiUrlTextField.becomeFirstResponder()
     }
     
-    // MARK: UI Methods
+    // MARK: - UI Methods
     
     private func updateUI() {
         apiUrlTextField.text = apiUrl ?? ""
@@ -46,7 +46,7 @@ class APIInfoViewController: UIViewController, UITextFieldDelegate {
     }
 
     
-    // MARK: UITextFieldDelegate
+    // MARK: - UITextFieldDelegate
     
     func textFieldDidEndEditing(_ textField: UITextField) {
         if textField == apiUrlTextField {
@@ -58,7 +58,6 @@ class APIInfoViewController: UIViewController, UITextFieldDelegate {
     
     // MARK: - Navigation
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == Storyboard.unwindSegueIdentifier {
             apiUrl = apiUrlTextField.text

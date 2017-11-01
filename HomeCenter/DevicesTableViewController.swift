@@ -9,7 +9,7 @@
 import UIKit
 import CoreData
 
-class DevicesTableViewController: FetchedResultsTableViewController {
+class DevicesTableViewController: FetchedResultsTableViewController, UISplitViewControllerDelegate {
     
     // MARK: Public API
     
@@ -17,6 +17,7 @@ class DevicesTableViewController: FetchedResultsTableViewController {
         didSet { updateUI() }
     }
     
+    //Set if you want to limit the number of devices shown.
     var room: Room? {
         didSet { updateUI() }
     }
@@ -42,11 +43,13 @@ class DevicesTableViewController: FetchedResultsTableViewController {
         super.viewDidLoad()
         refreshDevices()
         updateUI()
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem
+        
+        //Make myself the split view controllers delagate.
+        if let nvc = self.parent as? UINavigationController, let svc = nvc.parent as? UISplitViewController {
+            svc.delegate = self
+        } else {
+            print("Can't find svc")
+        }
     }
 
     // MARK: UI
@@ -56,7 +59,6 @@ class DevicesTableViewController: FetchedResultsTableViewController {
     }
     
     func updateUI() {
-        print("Updating UI")
         self.title = "Devices"
         if let context = container?.viewContext {
             let request: NSFetchRequest<Device> = Device.fetchRequest()
@@ -85,11 +87,15 @@ class DevicesTableViewController: FetchedResultsTableViewController {
         HomeFetcher.fetchDevices { [weak self] (jsonData, error) in
             if let error = error {
                 print("Error: \(error)")
-                self?.presentErrorAlert(withMessage: "Error downloading data from API")
+                DispatchQueue.main.async {
+                    self?.presentErrorAlert(withMessage: "Error downloading data from API")
+                }
             } else if let devicesData = jsonData {
                 self?.updateDatabase(with: devicesData)
             } else {
-                self?.presentErrorAlert(withMessage: "Didn't fetch any devices")
+                DispatchQueue.main.async {
+                    self?.presentErrorAlert(withMessage: "Didn't fetch any devices")
+                }
                 print("HomeFetcher didn't error or return a result - Why?")
             }
             DispatchQueue.main.async {
@@ -101,17 +107,35 @@ class DevicesTableViewController: FetchedResultsTableViewController {
     private func updateDatabase(with devicesData: [Any]) {
         container?.performBackgroundTask { [weak self] context in
             do {
+                var uuids: [String] = []
                 for device in devicesData {
                     if let deviceData = device as? [String: Any] {
-                        _ = try Device.findOrCreateDevice(matching: deviceData, in: context)
+                        if let newDevice = try Device.findOrCreateDevice(matching: deviceData, in: context), let uuid = newDevice.uuid {
+                            uuids.append(uuid)
+                        }
                     }
                 }
+                self?.deleteMissingDevices(from: uuids, in: context)
                 try context.save()
                 print("Context Saved")
             } catch {
                 print("Error creating or saving context: \(error)")
             }
             self?.printDBStats()
+        }
+    }
+    
+    private func deleteMissingDevices(from uuids: [String], in context: NSManagedObjectContext) {
+        context.performAndWait { //already in background
+            let request: NSFetchRequest<Device> = Device.fetchRequest()
+            if let matches = try? context.fetch(request) {
+                for device in matches {
+                    if let uuid = device.uuid, !uuids.contains(uuid) {
+                        print("Extra device: \(device.name!), removing")
+                        context.delete(device)
+                    }
+                }
+            }
         }
     }
     
@@ -138,9 +162,18 @@ class DevicesTableViewController: FetchedResultsTableViewController {
         return cell
     }
 
+    // MARK: UISplitViewControllerDelegate
+    
+    //Makes it show masterVC instead of detail
+    func splitViewController(_ splitViewController: UISplitViewController, collapseSecondary secondaryViewController: UIViewController, onto primaryViewController: UIViewController) -> Bool {
+        return true
+    }
+    
+    
     private struct Storyboard {
         static let DeviceCell = "Device Cell"
     }
+    
     
 }
 

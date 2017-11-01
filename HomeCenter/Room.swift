@@ -12,8 +12,10 @@ import CoreData
 class Room: NSManagedObject
 {
     
+    // MARK: - Initializers
+    
     class func findOrCreateRoom(matching roomData: [String: Any], in context: NSManagedObjectContext) throws -> Room? {
-        guard let uuid = roomData[jsonKeys.uuid] as? String else {
+        guard let uuid = roomData[JsonKeys.uuid] as? String else {
             return nil
         }
         let request: NSFetchRequest<Room> = Room.fetchRequest()
@@ -35,11 +37,7 @@ class Room: NSManagedObject
             throw error
         }
         //Write or update values
-        room.name = roomData[jsonKeys.name] as? String
-        if let dateString = roomData[jsonKeys.updated] as? String {
-            let formatter = ISO8601DateFormatter()
-            room.updated_at = formatter.date(from: dateString)
-        }
+        room.updateValues(with: roomData)
         
         return room
     }
@@ -61,7 +59,62 @@ class Room: NSManagedObject
         }
     }
     
-    private struct jsonKeys {
+    func saveToAPI(with completionHandler: @escaping (Error?) -> Void)  {
+        do {
+            if let roomID = uuid, let roomData = try convertToJson() {
+                HomeFetcher.editRoom(withID: roomID, roomData: roomData, completionHandler: { (roomData, error) in
+                    if let error = error {
+                        completionHandler(error)
+                    } else if let _ = roomData {
+                        completionHandler(nil)
+                    } else {
+                        print("No error or data in Room - saveToApi??")
+                        completionHandler(HomeFetcherError.DownloadError("No Data"))
+                    }
+                })
+            } else if let roomData = try convertToJson() {
+                HomeFetcher.addRoom(roomData, with: {[weak self] (roomData, error) in
+                    if let error = error {
+                        completionHandler(error)
+                    } else if let roomDict = roomData {
+                        self?.managedObjectContext?.perform {
+                            print("Updating room with id")
+                            self?.updateValues(with: roomDict)
+                        }
+                        completionHandler(nil)
+                    } else {
+                        print("No error or data in Room - savetoapi??? new")
+                        completionHandler(HomeFetcherError.DownloadError("No Data"))
+                    }
+                })
+            }
+        } catch {
+            completionHandler(error)
+        }
+    }
+    
+    // MARK: - Utility Methods
+    
+    func updateValues(with roomData: [String: Any]) {
+        if uuid == nil {
+            uuid = roomData[JsonKeys.uuid] as? String
+        }
+        name = roomData[JsonKeys.name] as? String
+        if let dateString = roomData[JsonKeys.updated] as? String {
+            let formatter = ISO8601DateFormatter()
+            updated_at = formatter.date(from: dateString)
+        }
+    }
+    
+    func convertToJson() throws -> String?  {
+        let roomDict = [
+            JsonKeys.name : self.name ?? ""
+        ]
+        let jsonData = try JSONSerialization.data(withJSONObject: roomDict, options: .prettyPrinted)
+        return String(data: jsonData, encoding: .utf8)
+    }
+    
+    private struct JsonKeys {
         static let name = "roomName"
         static let uuid = "uuid"
         static let updated = "updated_at"

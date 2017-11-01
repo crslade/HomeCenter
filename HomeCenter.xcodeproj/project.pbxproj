@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		541134351F9FFC9600D67920 /* APIInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 541134341F9FFC9600D67920 /* APIInfo.swift */; };
+		544721061FA7961C000BC97D /* EditRoomViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 544721051FA7961C000BC97D /* EditRoomViewController.swift */; };
 		545E030A1F9FD9CE008FDE18 /* FetchedResultsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 545E03091F9FD9CE008FDE18 /* FetchedResultsTableViewController.swift */; };
 		5465AA261FA10983000E47CD /* DevicesTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5465AA251FA10983000E47CD /* DevicesTableViewController.swift */; };
 		5465AA2A1FA26E99000E47CD /* KeychainAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5465AA291FA26E99000E47CD /* KeychainAccess.swift */; };
@@ -27,6 +28,7 @@
 
 /* Begin PBXFileReference section */
 		541134341F9FFC9600D67920 /* APIInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIInfo.swift; sourceTree = "<group>"; };
+		544721051FA7961C000BC97D /* EditRoomViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditRoomViewController.swift; sourceTree = "<group>"; };
 		545E03091F9FD9CE008FDE18 /* FetchedResultsTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchedResultsTableViewController.swift; sourceTree = "<group>"; };
 		5465AA251FA10983000E47CD /* DevicesTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicesTableViewController.swift; sourceTree = "<group>"; };
 		5465AA291FA26E99000E47CD /* KeychainAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainAccess.swift; sourceTree = "<group>"; };
@@ -66,6 +68,20 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		547A47731FA78C770069C91D /* View */ = {
+			isa = PBXGroup;
+			children = (
+				54FF29A01F9FDBB500584EB8 /* RoomsTableViewController.swift */,
+				544721051FA7961C000BC97D /* EditRoomViewController.swift */,
+				5465AA251FA10983000E47CD /* DevicesTableViewController.swift */,
+				5465AA2B1FA27879000E47CD /* APIInfoViewController.swift */,
+				54802C6A1F9E58E3005FF2C7 /* ViewController.swift */,
+				54FF29A21F9FDE3900584EB8 /* UIViewControllerUtilities.swift */,
+				54802C6C1F9E58E3005FF2C7 /* Main.storyboard */,
+			);
+			name = View;
+			sourceTree = "<group>";
+		};
 		54802C5C1F9E58E3005FF2C7 = {
 			isa = PBXGroup;
 			children = (
@@ -86,15 +102,8 @@
 		54802C671F9E58E3005FF2C7 /* HomeCenter */ = {
 			isa = PBXGroup;
 			children = (
-				54FF29A01F9FDBB500584EB8 /* RoomsTableViewController.swift */,
-				5465AA251FA10983000E47CD /* DevicesTableViewController.swift */,
-				5465AA2B1FA27879000E47CD /* APIInfoViewController.swift */,
-				54FF29A21F9FDE3900584EB8 /* UIViewControllerUtilities.swift */,
-				54802C6A1F9E58E3005FF2C7 /* ViewController.swift */,
-				54802C6C1F9E58E3005FF2C7 /* Main.storyboard */,
-				54802C821F9E6E8C005FF2C7 /* HomeFetcher.swift */,
-				5465AA291FA26E99000E47CD /* KeychainAccess.swift */,
-				54802C851F9E9A0A005FF2C7 /* CoreData */,
+				547A47731FA78C770069C91D /* View */,
+				54802C851F9E9A0A005FF2C7 /* Model */,
 				54802C841F9E99D1005FF2C7 /* Supporting Files */,
 				541134341F9FFC9600D67920 /* APIInfo.swift */,
 			);
@@ -112,15 +121,17 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		54802C851F9E9A0A005FF2C7 /* CoreData */ = {
+		54802C851F9E9A0A005FF2C7 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				54802C821F9E6E8C005FF2C7 /* HomeFetcher.swift */,
+				5465AA291FA26E99000E47CD /* KeychainAccess.swift */,
 				54802C7A1F9E593B005FF2C7 /* HomeCenter.xcdatamodeld */,
 				545E03091F9FD9CE008FDE18 /* FetchedResultsTableViewController.swift */,
 				54802C801F9E69EA005FF2C7 /* Device.swift */,
 				54802C7D1F9E64C1005FF2C7 /* Room.swift */,
 			);
-			name = CoreData;
+			name = Model;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -198,6 +209,7 @@
 				54FF29A11F9FDBB500584EB8 /* RoomsTableViewController.swift in Sources */,
 				5465AA2A1FA26E99000E47CD /* KeychainAccess.swift in Sources */,
 				54802C831F9E6E8C005FF2C7 /* HomeFetcher.swift in Sources */,
+				544721061FA7961C000BC97D /* EditRoomViewController.swift in Sources */,
 				54802C7C1F9E593B005FF2C7 /* HomeCenter.xcdatamodeld in Sources */,
 				54802C6B1F9E58E3005FF2C7 /* ViewController.swift in Sources */,
 				5465AA2C1FA27879000E47CD /* APIInfoViewController.swift in Sources */,
