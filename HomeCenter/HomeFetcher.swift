@@ -27,8 +27,7 @@ class HomeFetcher: NSObject
     }
     
     class func deleteRoom(withUUID uuid: String, with completionHandler: @escaping (Error?) -> Void) {
-        let path = "/rooms/"+uuid
-        sendDelete(for: path, with: completionHandler)
+        sendDelete(for: "/rooms/"+uuid, with: completionHandler)
     }
     
     class func addRoom(_ roomData: String, with completionHandler: @escaping ([String: Any]?, Error?) -> Void) {
@@ -49,6 +48,10 @@ class HomeFetcher: NSObject
     class func fetchDevices(completionHandler: @escaping ([Any]?, Error?) -> Void) {
         let path = "/devices"
         fetchArray(for: path, with: completionHandler)
+    }
+    
+    class func deleteDevice(withUUID uuid: String, with completionHandler: @escaping (Error?) -> Void) {
+        sendDelete(for: "/devices/"+uuid, with: completionHandler)
     }
     
     // MARK: - Helper Methods

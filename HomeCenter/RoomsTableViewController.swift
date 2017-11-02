@@ -99,14 +99,26 @@ class RoomsTableViewController: FetchedResultsTableViewController, UISplitViewCo
             Room.syncRooms(in: bgContext) {[weak self] (error) in
                 if let error = error {
                     print("Error syncing rooms: \(error)")
+                    self?.presentErrorAlert(withMessage: "Could not sync rooms")
                 }
+                self?.printDBStats()
                 DispatchQueue.main.async {
                     self?.refreshControl?.endRefreshing()
                 }
             }
         }
     }
-
+    
+    private func printDBStats() {
+        if let context = container?.viewContext {
+            context.perform {
+                if let roomCount = try? context.count(for: Room.fetchRequest()) {
+                    print("\(roomCount) rooms")
+                }
+            }
+        }
+    }
+    
     //MARK: - UITableViewDataSource
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -121,11 +133,7 @@ class RoomsTableViewController: FetchedResultsTableViewController, UISplitViewCo
         return cell
     }
     
-    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        return true
-    }
-    
-    override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+   override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
         let editRowAction = UITableViewRowAction(style: .default, title: "Edit") {[weak self] (action, indexPath) in
             self?.editRow(at: indexPath)
         }
@@ -149,28 +157,13 @@ class RoomsTableViewController: FetchedResultsTableViewController, UISplitViewCo
     
     func deleteRow(at indexPath: IndexPath) {
         print("Delete Row")
-        if let context = backgroundContext, let mainRoom = fetchedResultsController?.object(at: indexPath), let uuid = mainRoom.uuid {
-            let room = context.object(with: mainRoom.objectID)
-            HomeFetcher.deleteRoom(withUUID: uuid, with: { (error) in
+        if let room = fetchedResultsController?.object(at: indexPath), let context = backgroundContext {
+            room.delete(in: context)  { [weak self] (error) in
                 if let error = error {
-                    print("Error Deleting room: \(error)")
-                    DispatchQueue.main.async {
-                        self.presentErrorAlert(withMessage: "Couldn't send changes to API.")
-                    }
-                } else {
-                    context.perform {
-                        context.delete(room)
-                        do {
-                            try context.save()
-                        } catch {
-                            print("Error saving context: \(error)")
-                            DispatchQueue.main.async {
-                                self.presentErrorAlert(withMessage: "Couldn't save changes locally.")
-                            }
-                        }
-                    }
+                    print("Error deleting room: \(error)")
+                    self?.presentErrorAlert(withMessage: "Error deleting room.")
                 }
-            })
+            }
         }
     }
     

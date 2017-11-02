@@ -137,6 +137,29 @@ class Room: NSManagedObject
         }
     }
     
+    func delete(in context: NSManagedObjectContext, with completionHandler: @escaping (Error?) -> Void) {
+        let objectID = self.objectID
+        if let uuid = self.uuid {
+            HomeFetcher.deleteRoom(withUUID: uuid) { (error) in
+                if let error = error {
+                    completionHandler(error)
+                } else {
+                    context.perform {
+                        let room = context.object(with: objectID)
+                        context.delete(room)
+                        do {
+                            try context.save()
+                            completionHandler(nil)
+                        } catch {
+                            print("Error saving context")
+                            completionHandler(error)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
     // MARK: - Utility Methods
     
     func updateValues(with roomData: [String: Any]) {
