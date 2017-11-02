@@ -11,7 +11,7 @@ import CoreData
 
 class DevicesTableViewController: FetchedResultsTableViewController, UISplitViewControllerDelegate {
     
-    // MARK: Public API
+    // MARK: - Public API
     
     var container: NSPersistentContainer? = (UIApplication.shared.delegate as? AppDelegate)?.persistentContainer {
         didSet { updateUI() }
@@ -22,7 +22,7 @@ class DevicesTableViewController: FetchedResultsTableViewController, UISplitView
         didSet { updateUI() }
     }
     
-    // MARK: Lifecycle Methods and Data
+    // MARK:  - Lifecycle Methods
     
     private var fetchedResultsController: NSFetchedResultsController<Device>? {
         didSet {
@@ -41,9 +41,10 @@ class DevicesTableViewController: FetchedResultsTableViewController, UISplitView
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        // Enable Editing
+        self.navigationItem.rightBarButtonItem = self.editButtonItem
         refreshDevices()
         updateUI()
-        
         //Make myself the split view controllers delagate.
         if let nvc = self.parent as? UINavigationController, let svc = nvc.parent as? UISplitViewController {
             svc.delegate = self
@@ -52,7 +53,7 @@ class DevicesTableViewController: FetchedResultsTableViewController, UISplitView
         }
     }
 
-    // MARK: UI
+    // MARK: - UI
     
     @IBAction func refreshRequested(_ sender: UIRefreshControl) {
         refreshDevices()
@@ -62,7 +63,7 @@ class DevicesTableViewController: FetchedResultsTableViewController, UISplitView
         self.title = "Devices"
         if let context = container?.viewContext {
             let request: NSFetchRequest<Device> = Device.fetchRequest()
-            if let rm = room {
+            if let rm: Room = room {
                 self.title = rm.name ?? "Room Devices"
                 request.predicate = NSPredicate(format: "room = %@", rm)
             }
@@ -80,60 +81,21 @@ class DevicesTableViewController: FetchedResultsTableViewController, UISplitView
         }
     }
     
-    // MARK: API Data Management
+    // MARK: - Refreshing Methods
     
     private func refreshDevices() {
-        self.refreshControl?.beginRefreshing()
-        HomeFetcher.fetchDevices { [weak self] (jsonData, error) in
-            if let error = error {
-                print("Error: \(error)")
-                DispatchQueue.main.async {
-                    self?.presentErrorAlert(withMessage: "Error downloading data from API")
-                }
-            } else if let devicesData = jsonData {
-                self?.updateDatabase(with: devicesData)
-            } else {
-                DispatchQueue.main.async {
-                    self?.presentErrorAlert(withMessage: "Didn't fetch any devices")
-                }
-                print("HomeFetcher didn't error or return a result - Why?")
-            }
-            DispatchQueue.main.async {
-                self?.refreshControl?.endRefreshing()
-            }
-        }
-    }
-    
-    private func updateDatabase(with devicesData: [Any]) {
-        container?.performBackgroundTask { [weak self] context in
-            do {
-                var uuids: [String] = []
-                for device in devicesData {
-                    if let deviceData = device as? [String: Any] {
-                        if let newDevice = try Device.findOrCreateDevice(matching: deviceData, in: context), let uuid = newDevice.uuid {
-                            uuids.append(uuid)
-                        }
+        if let bgContext = container?.newBackgroundContext() {
+            self.refreshControl?.beginRefreshing()
+            Device.syncDevices(in: bgContext)  {[weak self] (error) in
+                if let error = error {
+                    print("Error syncing devices: \(error)")
+                    DispatchQueue.main.async {
+                        self?.presentErrorAlert(withMessage: "Could not sync devices.")
                     }
                 }
-                self?.deleteMissingDevices(from: uuids, in: context)
-                try context.save()
-                print("Context Saved")
-            } catch {
-                print("Error creating or saving context: \(error)")
-            }
-            self?.printDBStats()
-        }
-    }
-    
-    private func deleteMissingDevices(from uuids: [String], in context: NSManagedObjectContext) {
-        context.performAndWait { //already in background
-            let request: NSFetchRequest<Device> = Device.fetchRequest()
-            if let matches = try? context.fetch(request) {
-                for device in matches {
-                    if let uuid = device.uuid, !uuids.contains(uuid) {
-                        print("Extra device: \(device.name!), removing")
-                        context.delete(device)
-                    }
+                self?.printDBStats()
+                DispatchQueue.main.async {
+                    self?.refreshControl?.endRefreshing()
                 }
             }
         }
@@ -149,7 +111,26 @@ class DevicesTableViewController: FetchedResultsTableViewController, UISplitView
         }
     }
 
-    // MARKL UITableViewDataSource
+    // MARK: - TableViewRowAction Handler Methods
+    
+    private func deleteRow(at indexPath: IndexPath) {
+        print("Delete Row")
+        if let device = fetchedResultsController?.object(at: indexPath), let bgContext = container?.newBackgroundContext() {
+            print("Deleting device")
+            device.delete(in: bgContext) { [weak self] (error) in
+                if let error = error {
+                    print("Error deleting device: \(error)")
+                    self?.presentErrorAlert(withMessage: "Error deleting device")
+                }
+            }
+        }
+    }
+ 
+    private func editRow(at indexPath: IndexPath) {
+        print("Edit Row")
+    }
+    
+    // MARK: - UITableViewDataSource
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: Storyboard.DeviceCell, for: indexPath)
@@ -160,6 +141,18 @@ class DevicesTableViewController: FetchedResultsTableViewController, UISplitView
         }
         
         return cell
+    }
+    
+    override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+        let editAction = UITableViewRowAction(style: .default, title: "Edit") {[weak self] (rowAction, indexPath) in
+            self?.editRow(at: indexPath)
+        }
+        editAction.backgroundColor = .blue
+        let deleteAction = UITableViewRowAction(style: .destructive, title: "Delete") {[weak self] (rowAction, indexPath) in
+            self?.deleteRow(at: indexPath)
+        }
+        
+        return [deleteAction,editAction]
     }
 
     // MARK: UISplitViewControllerDelegate
