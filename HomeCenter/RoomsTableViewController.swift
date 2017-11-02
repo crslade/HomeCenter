@@ -94,81 +94,19 @@ class RoomsTableViewController: FetchedResultsTableViewController, UISplitViewCo
     // MARK: - API Data Management
     
     private func refreshRooms() {
-        self.refreshControl?.beginRefreshing()
-        HomeFetcher.fetchRooms { [weak self] (jsonData, error) in
-            if let error = error {
-                print("Error: \(error)")
+        if let bgContext = container?.newBackgroundContext() {
+            self.refreshControl?.beginRefreshing()
+            Room.syncRooms(in: bgContext) {[weak self] (error) in
+                if let error = error {
+                    print("Error syncing rooms: \(error)")
+                }
                 DispatchQueue.main.async {
-                    self?.presentErrorAlert(withMessage: "Error downloading data from API")
-                }
-            } else if let roomsData = jsonData {
-                self?.updateDatabase(with: roomsData)
-            } else {
-                print("HomeFetcher didn't error or return a result - Why?")
-                DispatchQueue.main.async {
-                    self?.presentErrorAlert(withMessage: "Didn't fetch any rooms")
-                }
-            }
-            DispatchQueue.main.async {
-                self?.refreshControl?.endRefreshing()
-            }
-        }
-    }
-    
-    
-    private func updateDatabase(with rooms: [Any]) {
-        container?.performBackgroundTask { [weak self] context in
-            var uuidArray: [String] = [] //check for any deleted rooms.
-            for room in rooms {
-                if let roomData = room as? [String: Any] {
-                    var newRoom: Room?
-                    do {
-                        newRoom = try Room.findOrCreateRoom(matching: roomData, in: context)
-                    } catch {
-                        DispatchQueue.main.async {
-                            self?.presentErrorAlert(withMessage: "Couldn't create room.")
-                        }
-                    }
-                    if let uuid = newRoom?.uuid {
-                        uuidArray.append(uuid)
-                    }
-                }
-            }
-            self?.deleteMissingRooms(from: uuidArray, in: context)
-            do {
-                try context.save()
-                print("Context Saved")
-            } catch {
-                print("Error Saving Context: \(error)")
-            }
-            self?.printDBStats()
-        }
-    }
-    
-    private func deleteMissingRooms(from uuids: [String], in context: NSManagedObjectContext) {
-        context.performAndWait { //already in background
-            let request: NSFetchRequest<Room> = Room.fetchRequest()
-            if let matches = try? context.fetch(request) {
-                for room in matches {
-                    if let uuid = room.uuid, !uuids.contains(uuid) {
-                        print("Extra room: \(room.name!), removing")
-                        context.delete(room)
-                    }
+                    self?.refreshControl?.endRefreshing()
                 }
             }
         }
     }
-    
-    private func printDBStats() {
-        if let context = container?.viewContext {
-            context.perform { 
-                if let roomCount = try? context.count(for: Room.fetchRequest()) {
-                    print("\(roomCount) rooms")
-                }
-            }
-        }
-    }
-    
+
     //MARK: - UITableViewDataSource
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

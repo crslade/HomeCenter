@@ -11,7 +11,7 @@ import CoreData
 
 class Room: NSManagedObject
 {
-    
+   
     // MARK: - Initializers
     
     class func findOrCreateRoom(matching roomData: [String: Any], in context: NSManagedObjectContext) throws -> Room? {
@@ -34,6 +34,7 @@ class Room: NSManagedObject
                 room.uuid = uuid
             }
         } catch {
+            print("Error fetching rooms in findorcreatingroom: \(error)")
             throw error
         }
         //Write or update values
@@ -56,6 +57,49 @@ class Room: NSManagedObject
             }
         } catch {
             throw error
+        }
+    }
+    
+    // MARK - Sync Methods
+    
+    class func syncRooms(in context: NSManagedObjectContext, with completionHandler: @escaping (Error?) -> Void) {
+        HomeFetcher.fetchRooms { (roomsData, error) in
+            if let error = error {
+                completionHandler(error)
+                return
+            } else if let roomsDict = roomsData {
+                context.perform {
+                    updateDatabase(with: roomsDict, in: context)
+                    do {
+                        try context.save()
+                        completionHandler(nil)
+                    } catch {
+                        print("Error saving context")
+                        completionHandler(error)
+                    }
+                }
+            }
+        }
+    }
+    
+    private class func updateDatabase(with roomsDictionary: [Any], in context: NSManagedObjectContext) {
+        var uuids: [String] = []
+        for roomDict in roomsDictionary {
+            if let roomData = roomDict as? [String: Any] {
+                if let room = try? Room.findOrCreateRoom(matching: roomData, in: context), let uuid = room?.uuid {
+                    uuids.append(uuid)
+                }
+            }
+        }
+        //delete rooms missing from API
+        let request: NSFetchRequest<Room> = Room.fetchRequest()
+        if let matches = try? context.fetch(request) {
+            for room in matches {
+                if let uuid = room.uuid, !uuids.contains(uuid) {
+                    print("Room not in API results, deleting.")
+                    context.delete(room)
+                }
+            }
         }
     }
     
