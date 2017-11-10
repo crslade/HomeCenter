@@ -106,7 +106,7 @@ class Room: NSManagedObject
     func saveToAPI(with completionHandler: @escaping (Error?) -> Void)  {
         do {
             if let roomID = uuid, let roomData = try convertToJson() {
-                HomeFetcher.editRoom(withID: roomID, roomData: roomData, completionHandler: { (roomData, error) in
+                HomeFetcher.editRoom(withID: roomID, roomData: roomData) { (roomData, error) in
                     if let error = error {
                         completionHandler(error)
                     } else if let _ = roomData {
@@ -115,7 +115,7 @@ class Room: NSManagedObject
                         print("No error or data in Room - saveToApi??")
                         completionHandler(HomeFetcherError.DownloadError("No Data"))
                     }
-                })
+                }
             } else if let roomData = try convertToJson() {
                 HomeFetcher.addRoom(roomData, with: {[weak self] (roomData, error) in
                     if let error = error {

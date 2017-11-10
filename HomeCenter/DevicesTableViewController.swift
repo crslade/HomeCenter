@@ -17,10 +17,18 @@ class DevicesTableViewController: FetchedResultsTableViewController, UISplitView
         didSet { updateUI() }
     }
     
-    //Set if you want to limit the number of devices shown.
+    //Set if you want to only show the devices that belong to a room.
     var room: Room? {
         didSet { updateUI() }
     }
+    
+    // MARK: - Internal Data
+    
+    //Main Queue context to make changes. Should save viewContext after saving this.
+    private lazy var backgroundContext: NSManagedObjectContext? = {
+        [weak self] in
+            return container?.newBackgroundContext()
+        }()
     
     // MARK:  - Lifecycle Methods
     
@@ -128,6 +136,9 @@ class DevicesTableViewController: FetchedResultsTableViewController, UISplitView
  
     private func editRow(at indexPath: IndexPath) {
         print("Edit Row")
+        if let device = fetchedResultsController?.object(at: indexPath) {
+            performSegue(withIdentifier: Storyboard.AddEditDeviceSegue, sender: device)
+        }
     }
     
     // MARK: - UITableViewDataSource
@@ -165,8 +176,56 @@ class DevicesTableViewController: FetchedResultsTableViewController, UISplitView
     
     private struct Storyboard {
         static let DeviceCell = "Device Cell"
+        static let AddEditDeviceSegue = "Add Edit Device"
     }
     
+    // MARK: - Navigation
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == Storyboard.AddEditDeviceSegue, let dvc = segue.destination.contentViewController as? EditDeviceViewController {
+            if let context = backgroundContext {
+                if let device = sender as? Device {
+                    dvc.device = context.object(with: device.objectID) as? Device
+                } else {
+                    dvc.device = Device(context: context)
+                }
+            }
+        }
+    }
+    
+    
+    @IBAction func cancelEditDevice(segue: UIStoryboardSegue) {
+        print("Cancel Editing")
+        backgroundContext?.reset()
+    }
+    
+    @IBAction func doneEditDevice(segue: UIStoryboardSegue) {
+        print("Done Editing")
+        if let device = (segue.source as? EditDeviceViewController)?.device {
+            device.saveToAPI {[weak self] (error) in
+                if let error = error {
+                    print("Error saving edit to API: \(error)")
+                    DispatchQueue.main.async {
+                        self?.presentErrorAlert(withMessage: "Error saving changes to API.")
+                    }
+                    self?.backgroundContext?.perform {
+                        self?.backgroundContext?.reset()
+                    }
+                } else {
+                    self?.backgroundContext?.perform {
+                        do {
+                            try self?.backgroundContext?.save()
+                        } catch {
+                            print("Error Saving context: \(error)")
+                            DispatchQueue.main.async {
+                                self?.presentErrorAlert(withMessage: "Error saving changes locally.")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
     
 }
 

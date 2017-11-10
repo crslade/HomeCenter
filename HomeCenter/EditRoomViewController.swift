@@ -35,9 +35,9 @@ class EditRoomViewController: UIViewController, UITextFieldDelegate {
     var isNew: Bool {
         get {
             if let _ = room?.uuid {
-                return true
-            } else {
                 return false
+            } else {
+                return true
             }
          }
     }

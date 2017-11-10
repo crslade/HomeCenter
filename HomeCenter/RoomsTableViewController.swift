@@ -208,6 +208,9 @@ class RoomsTableViewController: FetchedResultsTableViewController, UISplitViewCo
                     DispatchQueue.main.async {
                         self?.presentErrorAlert(withMessage: "Error Saving Changes to API.")
                     }
+                    self?.backgroundContext?.perform {
+                        self?.backgroundContext?.reset()
+                    }
                 } else {
                     self?.backgroundContext?.perform {
                         do {

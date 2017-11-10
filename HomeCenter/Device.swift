@@ -11,7 +11,10 @@ import CoreData
 
 class Device: NSManagedObject
 {
-
+    // MARK - Helper Variables
+    var jsonUrl: String?
+    var loadedProperties: Bool = false
+    
     // MARK: - Initialization
     
     class func findOrCreateDevice(matching deviceData: [String: Any], in context: NSManagedObjectContext) throws -> Device? {
@@ -36,24 +39,7 @@ class Device: NSManagedObject
             throw error
         }
         //Write or update values
-        device.name = deviceData[JsonKeys.name] as? String
-        device.type = deviceData[JsonKeys.type] as? String
-        if let dateString = deviceData[JsonKeys.updated] as? String {
-            let formatter = ISO8601DateFormatter()
-            device.updated_at = formatter.date(from: dateString)
-        }
-        do {
-            if let roomID = deviceData[JsonKeys.roomID] as? String {
-               print("\(roomID)")
-                if let room = try Room.findRoom(with: roomID, in: context) {
-
-                    device.room = room
-                }
-            }
-        } catch {
-            print("Couldn't fetch room")
-            throw error
-        }
+        device.updateValues(with: deviceData)
         
         return device
     }
@@ -101,6 +87,41 @@ class Device: NSManagedObject
         }
     }
     
+    func saveToAPI(with completionHandler: @escaping (Error?) -> Void) {
+        do {
+            if let deviceID = uuid, let deviceData = try convertToJson() {
+                print("Should update device: \(deviceID)")
+                HomeFetcher.editDevice(with: deviceID, deviceData: deviceData) { (deviceData, error) in
+                    if let error = error {
+                        completionHandler(error)
+                    } else if let _ = deviceData {
+                        print("Update succeeded")
+                        completionHandler(nil)
+                    }
+                }
+            } else if let deviceData = try convertToJson() {
+                HomeFetcher.addDevice(deviceData) {[weak self] (deviceData, error) in
+                    if let error = error {
+                        completionHandler(error)
+                    } else if let deviceDict = deviceData {
+                        self?.managedObjectContext?.perform {
+                            print("Updating device with id")
+                            self?.updateValues(with: deviceDict)
+                        }
+                        completionHandler(nil)
+                    } else {
+                        print("No error or data in Device - savetoapi?? new")
+                        completionHandler(HomeFetcherError.DownloadError("No Data"))
+                    }
+                }
+            }
+        } catch {
+            print("Error converting to Json: \(error)")
+            completionHandler(error)
+        }
+
+    }
+    
     func delete(in context: NSManagedObjectContext, with completionHandler: @escaping (Error?) -> Void) {
         let objectID = self.objectID
         if let uuid = self.uuid {
@@ -124,12 +145,69 @@ class Device: NSManagedObject
         }
     }
     
+    // MARK: - JSON Properties
+    
+    func loadJsonProperties(completionHandler: @escaping (Error?) -> Void) {
+        if let url = jsonUrl {
+            HomeFetcher.fetchDeviceJson(at: url) {[weak self] (jsonData, error) in
+                if let error = error {
+                    completionHandler(error)
+                } else if let jsonDict = jsonData {
+                    self?.name = jsonDict[JsonKeys.name] as? String
+                    self?.type = jsonDict[JsonKeys.type] as? String
+                    //TODO: Add parameters
+                    self?.loadedProperties = true
+                    completionHandler(nil)
+                } else {
+                    print("No Error or data??")
+                    completionHandler(HomeFetcherError.DownloadError("No Data"))
+                }
+            }
+        }
+    }
+    
+    // MARK: - Utility Methods
+    
+    func updateValues(with deviceData: [String: Any]) {
+        if uuid == nil {
+            uuid = deviceData[JsonKeys.uuid] as? String
+        }
+        name = deviceData[JsonKeys.name] as? String
+        type = deviceData[JsonKeys.type] as? String
+        if let dateString = deviceData[JsonKeys.updated] as? String {
+            let formatter = ISO8601DateFormatter()
+            updated_at = formatter.date(from: dateString)
+        }
+        do {
+            if let roomID = deviceData[JsonKeys.roomID] as? String, let context = managedObjectContext {
+                if let room = try Room.findRoom(with: roomID, in: context) {
+                    self.room = room
+                }
+            }
+        } catch {
+            print("Couldn't fetch room for device")
+        }
+    }
+    
+    // TODO: Add all fields (RoomID, parameters)
+    
+    func convertToJson() throws -> String? {
+        let deviceDict: [String: Any] = [
+            JsonKeys.name : self.name ?? "",
+            JsonKeys.type : self.type ?? "",
+            JsonKeys.roomID : self.room?.uuid as Any,
+            JsonKeys.parameters : []
+        ]
+        let jsonData = try JSONSerialization.data(withJSONObject: deviceDict, options: .prettyPrinted)
+        return String(data: jsonData, encoding: .utf8)
+    }
     
     private struct JsonKeys {
         static let name = "deviceName"
         static let uuid = "uuid"
         static let roomID = "roomID"
         static let type = "deviceType"
+        static let parameters = "parameters"
         static let updated = "updated_at"
     }
     

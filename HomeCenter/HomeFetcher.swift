@@ -40,6 +40,38 @@ class HomeFetcher: NSObject
     
     // MARK: - Devices
     
+    class func fetchDeviceJson(at fullURL: String, completionHandler: @escaping ([String: Any]?, Error?) -> Void) {
+        guard let url = URL(string: fullURL) else {
+            print("Could not form URL")
+            completionHandler(nil,HomeFetcherError.URLError("Could not create URL"))
+            return
+        }
+        (URLSession.shared.dataTask(with: url) { (data, response, error) in
+            if let error = error {
+                print("Error downloading Data")
+                completionHandler(nil, error)
+            } else if let response = response as? HTTPURLResponse, let data = data {
+                if response.statusCode == 200 {
+                    do {
+                        let json = try JSONSerialization.jsonObject(with: data)
+                        if let jsonDict = json as? [String: Any] {
+                            completionHandler(jsonDict,nil)
+                        } else {
+                            print("Didn't get JSON object back")
+                            completionHandler(nil, HomeFetcherError.DownloadError("Expected JSON Object"))
+                        }
+                    } catch {
+                        print("JSON Parse Error: \(error)")
+                        completionHandler(nil,error)
+                    }
+                } else {
+                    completionHandler(nil,HomeFetcherError.DownloadError("Requset return response code \(response.statusCode)"))
+                }
+            }
+        }).resume()
+        
+    }
+    
     class func fetchDevices(for roomUUID: String, completionHandler: @escaping ([Any]?, Error?) -> Void) {
         let path = "/rooms/\(roomUUID)/devices"
         fetchArray(for: path, with: completionHandler)
@@ -50,7 +82,15 @@ class HomeFetcher: NSObject
         fetchArray(for: path, with: completionHandler)
     }
     
-    class func deleteDevice(withUUID uuid: String, with completionHandler: @escaping (Error?) -> Void) {
+    class func addDevice(_ deviceData: String, with completionHandler: @escaping ([String: Any]?, Error?) -> Void) {
+        sendRequest(withData: deviceData, toPath: "/devices", withMethod: "POST", with: completionHandler)
+    }
+    
+    class func editDevice(with uuid: String, deviceData: String, compleationHandler: @escaping ([String: Any]?, Error?) -> Void) {
+        sendRequest(withData: deviceData, toPath: "/devices/"+uuid, withMethod: "PATCH", with: compleationHandler)
+    }
+    
+    class func deleteDevice(withUUID uuid: String,with completionHandler: @escaping (Error?) -> Void) {
         sendDelete(for: "/devices/"+uuid, with: completionHandler)
     }
     
@@ -82,7 +122,7 @@ class HomeFetcher: NSObject
                             completionHandler(jsonDict,nil)
                         } else {
                             print("Didn't get an object back")
-                            completionHandler(nil, HomeFetcherError.DownloadError("Expected Object"))
+                            completionHandler(nil, HomeFetcherError.DownloadError("Expected JSON Object"))
                         }
                     } catch {
                         print("JSON Parse Error")
