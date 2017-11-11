@@ -115,6 +115,14 @@ class DevicesTableViewController: FetchedResultsTableViewController, UISplitView
                 if let deviceCount = try? context.count(for: Device.fetchRequest()) {
                     print("\(deviceCount) devices")
                 }
+                let request: NSFetchRequest<Parameter> = Parameter.fetchRequest()
+                if let matches = try? context.fetch(request) {
+                    for param in matches {
+                        if let name = param.name, let uuid = param.uuid, let deviceName = param.device?.name {
+                            print("Device: \(deviceName) Param: \(name) uuid: \(uuid)")
+                        }
+                    }
+                }
             }
         }
     }

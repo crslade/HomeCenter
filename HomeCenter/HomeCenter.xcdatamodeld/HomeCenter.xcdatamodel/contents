@@ -1,11 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="13241" systemVersion="" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="13533" systemVersion="17B48" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="Device" representedClassName=".Device" syncable="YES" codeGenerationType="category">
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="type" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="updated_at" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="uuid" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="parameters" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Parameter" inverseName="device" inverseEntity="Parameter" syncable="YES"/>
         <relationship name="room" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Room" inverseName="devices" inverseEntity="Room" syncable="YES"/>
+    </entity>
+    <entity name="Parameter" representedClassName=".Parameter" syncable="YES" codeGenerationType="category">
+        <attribute name="actions" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="type" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="updated_at" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="uuid" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="value" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="device" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Device" inverseName="parameters" inverseEntity="Device" syncable="YES"/>
     </entity>
     <entity name="Room" representedClassName=".Room" syncable="YES" codeGenerationType="category">
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
@@ -14,7 +24,8 @@
         <relationship name="devices" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Device" inverseName="room" inverseEntity="Device" syncable="YES"/>
     </entity>
     <elements>
-        <element name="Device" positionX="259" positionY="-72" width="128" height="118"/>
+        <element name="Device" positionX="259" positionY="-72" width="128" height="133"/>
         <element name="Room" positionX="-18" positionY="-72" width="128" height="103"/>
+        <element name="Parameter" positionX="495" positionY="-54" width="128" height="148"/>
     </elements>
 </model>

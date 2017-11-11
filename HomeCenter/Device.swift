@@ -11,14 +11,16 @@ import CoreData
 
 class Device: NSManagedObject
 {
-    // MARK - Helper Variables
+    // MARK: - Helper Variables
     var jsonUrl: String?
+    var parameterData: [Any]?
+
     var loadedProperties: Bool = false
     
     // MARK: - Initialization
     
     class func findOrCreateDevice(matching deviceData: [String: Any], in context: NSManagedObjectContext) throws -> Device? {
-        guard let uuid = deviceData["uuid"] as? String else {
+        guard let uuid = deviceData[JsonKeys.uuid] as? String else {
             return nil
         }
         let request: NSFetchRequest<Device> = Device.fetchRequest()
@@ -29,7 +31,7 @@ class Device: NSManagedObject
         do {
             let matches = try context.fetch(request)
             if matches.count > 0 {
-                assert(matches.count == 1, "Room.findOrCreateDevice - database inconsistency")
+                assert(matches.count == 1, "Device.findOrCreateDevice - database inconsistency")
                 device = matches[0]
             } else {
                 device = Device(context: context)
@@ -155,7 +157,7 @@ class Device: NSManagedObject
                 } else if let jsonDict = jsonData {
                     self?.name = jsonDict[JsonKeys.name] as? String
                     self?.type = jsonDict[JsonKeys.type] as? String
-                    //TODO: Add parameters
+                    self?.parameterData = jsonDict[JsonKeys.parameters] as? [Any]
                     self?.loadedProperties = true
                     completionHandler(nil)
                 } else {
@@ -168,7 +170,7 @@ class Device: NSManagedObject
     
     // MARK: - Utility Methods
     
-    func updateValues(with deviceData: [String: Any]) {
+    private func updateValues(with deviceData: [String: Any]) {
         if uuid == nil {
             uuid = deviceData[JsonKeys.uuid] as? String
         }
@@ -178,6 +180,7 @@ class Device: NSManagedObject
             let formatter = ISO8601DateFormatter()
             updated_at = formatter.date(from: dateString)
         }
+        //connect to room
         do {
             if let roomID = deviceData[JsonKeys.roomID] as? String, let context = managedObjectContext {
                 if let room = try Room.findRoom(with: roomID, in: context) {
@@ -185,19 +188,40 @@ class Device: NSManagedObject
                 }
             }
         } catch {
-            print("Couldn't fetch room for device")
+            print("Couldn't fetch room for device: \(error)")
+        }
+        if let paramsData = deviceData[JsonKeys.parameters] as? [Any] {
+            updateParameters(with: paramsData)
         }
     }
     
-    // TODO: Add all fields (RoomID, parameters)
+    private func updateParameters(with paramsData: [Any]) {
+        if let context = self.managedObjectContext {
+            for paramData in paramsData {
+                if let paramDict = paramData as? [String: Any] {
+                    do {
+                        print("Trying to create param with: \(paramDict)")
+                        if let param = try Parameter.findOrCreateParameter(matching: paramDict, in: context) {
+                            param.device = self
+                        }
+                    } catch {
+                        print("Failed to create parameter. \(error)")
+                    }
+                }
+            }
+        }
+    }
     
-    func convertToJson() throws -> String? {
-        let deviceDict: [String: Any] = [
+    
+    private func convertToJson() throws -> String? {
+        var deviceDict: [String: Any] = [
             JsonKeys.name : self.name ?? "",
             JsonKeys.type : self.type ?? "",
-            JsonKeys.roomID : self.room?.uuid as Any,
-            JsonKeys.parameters : []
+            JsonKeys.roomID : self.room?.uuid as Any
         ]
+        if let paramsData = parameterData {
+            deviceDict[JsonKeys.parameters] = paramsData
+        }
         let jsonData = try JSONSerialization.data(withJSONObject: deviceDict, options: .prettyPrinted)
         return String(data: jsonData, encoding: .utf8)
     }

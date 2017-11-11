@@ -10,6 +10,7 @@
 		541134351F9FFC9600D67920 /* APIInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 541134341F9FFC9600D67920 /* APIInfo.swift */; };
 		543C6D281FB258030000BC3E /* EditDeviceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 543C6D271FB258030000BC3E /* EditDeviceViewController.swift */; };
 		544721061FA7961C000BC97D /* EditRoomViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 544721051FA7961C000BC97D /* EditRoomViewController.swift */; };
+		5459D35B1FB6316200EE66D4 /* Parameter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5459D35A1FB6316200EE66D4 /* Parameter.swift */; };
 		545E030A1F9FD9CE008FDE18 /* FetchedResultsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 545E03091F9FD9CE008FDE18 /* FetchedResultsTableViewController.swift */; };
 		5465AA261FA10983000E47CD /* DevicesTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5465AA251FA10983000E47CD /* DevicesTableViewController.swift */; };
 		5465AA2A1FA26E99000E47CD /* KeychainAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5465AA291FA26E99000E47CD /* KeychainAccess.swift */; };
@@ -31,6 +32,7 @@
 		541134341F9FFC9600D67920 /* APIInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIInfo.swift; sourceTree = "<group>"; };
 		543C6D271FB258030000BC3E /* EditDeviceViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditDeviceViewController.swift; sourceTree = "<group>"; };
 		544721051FA7961C000BC97D /* EditRoomViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditRoomViewController.swift; sourceTree = "<group>"; };
+		5459D35A1FB6316200EE66D4 /* Parameter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parameter.swift; sourceTree = "<group>"; };
 		545E03091F9FD9CE008FDE18 /* FetchedResultsTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchedResultsTableViewController.swift; sourceTree = "<group>"; };
 		5465AA251FA10983000E47CD /* DevicesTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicesTableViewController.swift; sourceTree = "<group>"; };
 		5465AA291FA26E99000E47CD /* KeychainAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainAccess.swift; sourceTree = "<group>"; };
@@ -133,6 +135,7 @@
 				545E03091F9FD9CE008FDE18 /* FetchedResultsTableViewController.swift */,
 				54802C801F9E69EA005FF2C7 /* Device.swift */,
 				54802C7D1F9E64C1005FF2C7 /* Room.swift */,
+				5459D35A1FB6316200EE66D4 /* Parameter.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -220,6 +223,7 @@
 				54FF29A31F9FDE3900584EB8 /* UIViewControllerUtilities.swift in Sources */,
 				543C6D281FB258030000BC3E /* EditDeviceViewController.swift in Sources */,
 				54802C7E1F9E64C1005FF2C7 /* Room.swift in Sources */,
+				5459D35B1FB6316200EE66D4 /* Parameter.swift in Sources */,
 				545E030A1F9FD9CE008FDE18 /* FetchedResultsTableViewController.swift in Sources */,
 				54802C691F9E58E3005FF2C7 /* AppDelegate.swift in Sources */,
 				5465AA261FA10983000E47CD /* DevicesTableViewController.swift in Sources */,
