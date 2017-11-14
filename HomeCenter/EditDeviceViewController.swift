@@ -44,8 +44,15 @@ class EditDeviceViewController: UIViewController, UITextFieldDelegate, UIPickerV
         }
     }
     
-    var propertyCount: Int {
-        get { return 0 }
+    var paramCount: Int {
+        get {
+            if self.isNew {
+                return device?.parameterData?.count ?? 0
+            } else {
+                return device?.parameters?.count ?? 0
+            }
+            
+        }
     }
     
     var isNew: Bool {
@@ -68,7 +75,7 @@ class EditDeviceViewController: UIViewController, UITextFieldDelegate, UIPickerV
     @IBOutlet weak var roomPicker: UIPickerView! { didSet { roomPicker?.dataSource = self; roomPicker?.delegate = self; roomPicker?.showsSelectionIndicator = true } }
     @IBOutlet weak var editDeviceControls: UIStackView!
     @IBOutlet weak var deviceTypeLabel: UILabel!
-    @IBOutlet weak var propertiesCountLabel: UILabel!
+    @IBOutlet weak var paramCountLabel: UILabel!
     @IBOutlet weak var doneButton: UIBarButtonItem!
     
     // MARK: - Lifecycle Methods and Data
@@ -136,7 +143,7 @@ class EditDeviceViewController: UIViewController, UITextFieldDelegate, UIPickerV
         //Update Labels and Fields
         nameTextField?.text = deviceName
         deviceTypeLabel?.text = deviceType
-        propertiesCountLabel?.text = "\(propertyCount)"
+        paramCountLabel?.text = "\(paramCount)"
         roomPicker?.selectRow(positionOf(room: device?.room), inComponent: 0, animated: false)
     }
 

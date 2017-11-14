@@ -94,6 +94,20 @@ class HomeFetcher: NSObject
         sendDelete(for: "/devices/"+uuid, with: completionHandler)
     }
     
+    // MARK: - Parameters
+    
+    class func editParameter(with uuid: String, paramData: String, completionHandler: @escaping (Error?) -> Void) {
+        sendRequest(withData: paramData, toPath: "/parameters/"+uuid, withMethod: "PATCH") { (resultData, error) in
+            if let error = error {
+                completionHandler(error)
+            } else if let _ = resultData {
+                completionHandler(nil)
+            } else {
+                completionHandler(HomeFetcherError.DownloadError("No Data in result."))
+            }
+        }
+    }
+    
     // MARK: - Helper Methods
     
     //expects object back, not an array

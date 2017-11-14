@@ -39,6 +39,26 @@ class Parameter: NSManagedObject {
         return param
     }
     
+    func saveToAPI(with completionHandler: @escaping (Error?) -> Void) {
+        do {
+            if let paramId = uuid,  let jsonData = try convertToJson() {
+                HomeFetcher.editParameter(with: paramId, paramData: jsonData) { (error) in
+                    if let error = error {
+                        completionHandler(error)
+                    } else {
+                        completionHandler(nil)
+                    }
+                }
+            } else {
+                print("No UUID in Param Save/")
+                completionHandler(HomeFetcherError.MissingAPIValues("No UUID or Json Error"))
+            }
+        } catch {
+            print("Error converting to Json: \(error)")
+            completionHandler(error)
+        }
+    }
+    
     private func updateValues(with paramData: [String: Any]) {
         if uuid == nil {
             uuid = paramData[JsonKeys.uuid] as? String
@@ -51,7 +71,14 @@ class Parameter: NSManagedObject {
             let formatter = ISO8601DateFormatter()
             updated_at = formatter.date(from: dateString)
         }
-        
+    }
+    
+    private func convertToJson() throws -> String? {
+        let paramDict: [String: Any] = [
+            JsonKeys.value: self.value ?? ""
+        ]
+        let jsonData = try JSONSerialization.data(withJSONObject: paramDict, options: .prettyPrinted)
+        return String(data: jsonData, encoding: .utf8)
     }
     
     private struct JsonKeys {

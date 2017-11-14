@@ -50,7 +50,7 @@ class DevicesTableViewController: FetchedResultsTableViewController, UISplitView
     override func viewDidLoad() {
         super.viewDidLoad()
         // Enable Editing
-        self.navigationItem.rightBarButtonItem = self.editButtonItem
+        //self.navigationItem.rightBarButtonItem = self.editButtonItem
         refreshDevices()
         updateUI()
         //Make myself the split view controllers delagate.
@@ -115,14 +115,14 @@ class DevicesTableViewController: FetchedResultsTableViewController, UISplitView
                 if let deviceCount = try? context.count(for: Device.fetchRequest()) {
                     print("\(deviceCount) devices")
                 }
-                let request: NSFetchRequest<Parameter> = Parameter.fetchRequest()
-                if let matches = try? context.fetch(request) {
-                    for param in matches {
-                        if let name = param.name, let uuid = param.uuid, let deviceName = param.device?.name {
-                            print("Device: \(deviceName) Param: \(name) uuid: \(uuid)")
-                        }
-                    }
-                }
+//                let request: NSFetchRequest<Parameter> = Parameter.fetchRequest()
+//                if let matches = try? context.fetch(request) {
+//                    for param in matches {
+//                        if let name = param.name, let uuid = param.uuid, let deviceName = param.device?.name {
+//                            print("Device: \(deviceName) Param: \(name) uuid: \(uuid)")
+//                        }
+//                    }
+//                }
             }
         }
     }
@@ -185,6 +185,7 @@ class DevicesTableViewController: FetchedResultsTableViewController, UISplitView
     private struct Storyboard {
         static let DeviceCell = "Device Cell"
         static let AddEditDeviceSegue = "Add Edit Device"
+        static let ShowDeviceSegue = "Show Device"
     }
     
     // MARK: - Navigation
@@ -196,7 +197,15 @@ class DevicesTableViewController: FetchedResultsTableViewController, UISplitView
                     dvc.device = context.object(with: device.objectID) as? Device
                 } else {
                     dvc.device = Device(context: context)
+                    if room != nil, let bgcontextRoom = context.object(with: room!.objectID) as? Room {
+                        dvc.device!.room = bgcontextRoom
+                    }
                 }
+            }
+        }
+        if segue.identifier == Storyboard.ShowDeviceSegue, let dvc = segue.destination.contentViewController as? DeviceTableViewController, let cell = sender as? UITableViewCell {
+            if let indexPath = tableView.indexPath(for: cell) {
+                dvc.device = fetchedResultsController?.object(at: indexPath)
             }
         }
     }

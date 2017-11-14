@@ -51,7 +51,7 @@ class RoomsTableViewController: FetchedResultsTableViewController, UISplitViewCo
         }
         updateUI()
         // Enable Editing
-        self.navigationItem.rightBarButtonItem = self.editButtonItem
+        //self.navigationItem.rightBarButtonItem = self.editButtonItem
         //Make myself the split view controllers delagate.
         if let nvc = self.parent as? UINavigationController, let svc = nvc.parent as? UISplitViewController {
             svc.delegate = self

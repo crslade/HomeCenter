@@ -24,6 +24,8 @@
 		54802C7E1F9E64C1005FF2C7 /* Room.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54802C7D1F9E64C1005FF2C7 /* Room.swift */; };
 		54802C811F9E69EA005FF2C7 /* Device.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54802C801F9E69EA005FF2C7 /* Device.swift */; };
 		54802C831F9E6E8C005FF2C7 /* HomeFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54802C821F9E6E8C005FF2C7 /* HomeFetcher.swift */; };
+		548436FA1FBA271A006F6AA9 /* ParameterTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 548436F91FBA271A006F6AA9 /* ParameterTableViewCell.swift */; };
+		548436FC1FBA2B3D006F6AA9 /* DeviceTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 548436FB1FBA2B3D006F6AA9 /* DeviceTableViewController.swift */; };
 		54FF29A11F9FDBB500584EB8 /* RoomsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54FF29A01F9FDBB500584EB8 /* RoomsTableViewController.swift */; };
 		54FF29A31F9FDE3900584EB8 /* UIViewControllerUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54FF29A21F9FDE3900584EB8 /* UIViewControllerUtilities.swift */; };
 /* End PBXBuildFile section */
@@ -49,6 +51,8 @@
 		54802C7D1F9E64C1005FF2C7 /* Room.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Room.swift; sourceTree = "<group>"; };
 		54802C801F9E69EA005FF2C7 /* Device.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Device.swift; sourceTree = "<group>"; };
 		54802C821F9E6E8C005FF2C7 /* HomeFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeFetcher.swift; sourceTree = "<group>"; };
+		548436F91FBA271A006F6AA9 /* ParameterTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParameterTableViewCell.swift; sourceTree = "<group>"; };
+		548436FB1FBA2B3D006F6AA9 /* DeviceTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceTableViewController.swift; sourceTree = "<group>"; };
 		54FF29A01F9FDBB500584EB8 /* RoomsTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomsTableViewController.swift; sourceTree = "<group>"; };
 		54FF29A21F9FDE3900584EB8 /* UIViewControllerUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViewControllerUtilities.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -79,8 +83,10 @@
 				544721051FA7961C000BC97D /* EditRoomViewController.swift */,
 				5465AA251FA10983000E47CD /* DevicesTableViewController.swift */,
 				543C6D271FB258030000BC3E /* EditDeviceViewController.swift */,
+				548436FB1FBA2B3D006F6AA9 /* DeviceTableViewController.swift */,
 				5465AA2B1FA27879000E47CD /* APIInfoViewController.swift */,
 				54802C6A1F9E58E3005FF2C7 /* ViewController.swift */,
+				548436F91FBA271A006F6AA9 /* ParameterTableViewCell.swift */,
 				54FF29A21F9FDE3900584EB8 /* UIViewControllerUtilities.swift */,
 				54802C6C1F9E58E3005FF2C7 /* Main.storyboard */,
 			);
@@ -219,10 +225,12 @@
 				54802C7C1F9E593B005FF2C7 /* HomeCenter.xcdatamodeld in Sources */,
 				54802C6B1F9E58E3005FF2C7 /* ViewController.swift in Sources */,
 				5465AA2C1FA27879000E47CD /* APIInfoViewController.swift in Sources */,
+				548436FC1FBA2B3D006F6AA9 /* DeviceTableViewController.swift in Sources */,
 				541134351F9FFC9600D67920 /* APIInfo.swift in Sources */,
 				54FF29A31F9FDE3900584EB8 /* UIViewControllerUtilities.swift in Sources */,
 				543C6D281FB258030000BC3E /* EditDeviceViewController.swift in Sources */,
 				54802C7E1F9E64C1005FF2C7 /* Room.swift in Sources */,
+				548436FA1FBA271A006F6AA9 /* ParameterTableViewCell.swift in Sources */,
 				5459D35B1FB6316200EE66D4 /* Parameter.swift in Sources */,
 				545E030A1F9FD9CE008FDE18 /* FetchedResultsTableViewController.swift in Sources */,
 				54802C691F9E58E3005FF2C7 /* AppDelegate.swift in Sources */,

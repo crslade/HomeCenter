@@ -200,7 +200,6 @@ class Device: NSManagedObject
             for paramData in paramsData {
                 if let paramDict = paramData as? [String: Any] {
                     do {
-                        print("Trying to create param with: \(paramDict)")
                         if let param = try Parameter.findOrCreateParameter(matching: paramDict, in: context) {
                             param.device = self
                         }
