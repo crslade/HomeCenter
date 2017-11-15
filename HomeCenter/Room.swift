@@ -60,7 +60,7 @@ class Room: NSManagedObject
         }
     }
     
-    // MARK - Sync Methods
+    // MARK: - Sync Methods
     
     class func syncRooms(in context: NSManagedObjectContext, with completionHandler: @escaping (Error?) -> Void) {
         HomeFetcher.fetchRooms { (roomsData, error) in

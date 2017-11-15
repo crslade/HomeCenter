@@ -39,6 +39,27 @@ class Parameter: NSManagedObject {
         return param
     }
     
+    class func findParameter(for uuid: String, in context: NSManagedObjectContext) throws -> Parameter? {
+        let request: NSFetchRequest<Parameter> = Parameter.fetchRequest()
+        request.predicate = NSPredicate(format: "uuid = %@", uuid)
+        
+        var param: Parameter?
+        do {
+            let matches = try context.fetch(request)
+            if matches.count > 0 {
+                assert(matches.count == 1, "Parameter.findParameter - database inconsistency")
+                param = matches[0]
+            }
+        } catch {
+            print("Error fetching parameter: \(error)")
+            throw error
+        }
+        
+        return param
+    }
+    
+    // MARK: - Sync Methods
+    
     func saveToAPI(with completionHandler: @escaping (Error?) -> Void) {
         do {
             if let paramId = uuid,  let jsonData = try convertToJson() {

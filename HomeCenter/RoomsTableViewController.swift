@@ -67,7 +67,7 @@ class RoomsTableViewController: FetchedResultsTableViewController, UISplitViewCo
         }
     }
     
-    // MARK: UI
+    // MARK: - UI
     
     private func updateUI() {
         if let context = container?.viewContext {
@@ -99,7 +99,9 @@ class RoomsTableViewController: FetchedResultsTableViewController, UISplitViewCo
             Room.syncRooms(in: bgContext) {[weak self] (error) in
                 if let error = error {
                     print("Error syncing rooms: \(error)")
-                    self?.presentErrorAlert(withMessage: "Could not sync rooms")
+                    DispatchQueue.main.async {
+                        self?.presentErrorAlert(withMessage: "Could not sync rooms")
+                    }
                 }
                 self?.printDBStats()
                 DispatchQueue.main.async {
@@ -127,7 +129,7 @@ class RoomsTableViewController: FetchedResultsTableViewController, UISplitViewCo
         if let room = fetchedResultsController?.object(at: indexPath) {
             cell.textLabel?.text = room.name ?? "<No Name>"
             let deviceCount = room.devices?.count ?? 0
-            cell.detailTextLabel?.text = (deviceCount == 1) ? "\(deviceCount) device" : "\(deviceCount) devices"
+            cell.detailTextLabel?.text = (deviceCount == 1) ? "1 device" : "\(deviceCount) devices"
         }
         
         return cell

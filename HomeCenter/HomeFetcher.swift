@@ -22,8 +22,7 @@ class HomeFetcher: NSObject
     // MARK: - Rooms
     
     class func fetchRooms(completionHandler: @escaping ([Any]?, Error?) -> Void) {
-        let path = "/rooms"
-        fetchArray(for: path, with: completionHandler)
+        fetchArray(for: "/rooms", with: completionHandler)
     }
     
     class func deleteRoom(withUUID uuid: String, with completionHandler: @escaping (Error?) -> Void) {
@@ -73,8 +72,7 @@ class HomeFetcher: NSObject
     }
     
     class func fetchDevices(for roomUUID: String, completionHandler: @escaping ([Any]?, Error?) -> Void) {
-        let path = "/rooms/\(roomUUID)/devices"
-        fetchArray(for: path, with: completionHandler)
+        fetchArray(for: "/rooms/\(roomUUID)/devices", with: completionHandler)
     }
     
     class func fetchDevices(completionHandler: @escaping ([Any]?, Error?) -> Void) {
@@ -106,6 +104,12 @@ class HomeFetcher: NSObject
                 completionHandler(HomeFetcherError.DownloadError("No Data in result."))
             }
         }
+    }
+    
+    // MARK: - Actions
+    
+    class func fetchActions(with completionHandler: @escaping ([Any]?, Error?) -> Void) {
+        fetchArray(for: "/actions", with: completionHandler)
     }
     
     // MARK: - Helper Methods
