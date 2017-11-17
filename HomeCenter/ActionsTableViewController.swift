@@ -41,12 +41,6 @@ class ActionsTableViewController: FetchedResultsTableViewController, UISplitView
             }
         }
     }
-
-    private lazy var scratchpadContext: NSManagedObjectContext = {
-        let newContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
-        newContext.parent = self.container?.viewContext
-        return newContext
-        }()
     
     // MARK: - UI
     
@@ -137,38 +131,23 @@ class ActionsTableViewController: FetchedResultsTableViewController, UISplitView
     
     @IBAction func cancelEditAction(segue: UIStoryboardSegue) {
         print("Cancel Edit Action")
-        scratchpadContext.rollback()
-//        if let editAction = (segue.source as? EditActionViewController)?.action {
-//            scratchpadContext.perform { [weak self] in
-//                self?.scratchpadContext.delete(editAction)
-//            }
-//        }
+         container?.viewContext.rollback()
     }
     
     @IBAction func doneEditAction(segue: UIStoryboardSegue) {
         print("Done Edit Action")
-        if let editAction = (segue.source as? EditActionViewController)?.action {
-            editAction.saveToAPI() {[weak self] (error) in
-                self?.scratchpadContext.perform {
+        if let action = (segue.source as? EditActionViewController)?.action, let context = action.managedObjectContext {
+            action.saveToAPI() {[weak self] (error) in
+                context.perform {
                     if let error = error {
-                        self?.scratchpadContext.rollback()
+                        context.rollback()
                         print("Error saving to API: \(error)")
                         DispatchQueue.main.async {
                             self?.presentErrorAlert(withMessage: "Error Saving changes locally.")
                         }
                     } else {
                         do {
-                            try self?.scratchpadContext.save()
-                            self?.container?.viewContext.performAndWait {
-                                do {
-                                    try self?.container?.viewContext.save()
-                                } catch {
-                                    print("Couldn't save view context: \(error)")
-                                    DispatchQueue.main.async {
-                                        self?.presentErrorAlert(withMessage: "Error saving changes locally.")
-                                    }
-                                }
-                            }
+                            try context.save()
                         } catch {
                             print("Coundn't save child context: \(error)")
                             DispatchQueue.main.async {
@@ -188,8 +167,9 @@ class ActionsTableViewController: FetchedResultsTableViewController, UISplitView
                 dvc.action = fetchedResultsController?.object(at: indexPath)
             }
         }
-        if segue.identifier == Storyboard.AddActionSegue, let dvc = segue.destination.contentViewController as? EditActionViewController {
-            dvc.action = Action(context: scratchpadContext)
+        if segue.identifier == Storyboard.AddActionSegue, let dvc = segue.destination.contentViewController as? EditActionViewController,
+            let context = container?.viewContext {
+            dvc.action = Action(context: context)
         }
     }
 

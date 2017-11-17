@@ -21,12 +21,6 @@ class RoomsTableViewController: FetchedResultsTableViewController, UISplitViewCo
     
     private var needsAPIKeys: Bool = false
     
-    private lazy var scratchpadContext: NSManagedObjectContext = {
-        let newContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
-        newContext.parent = self.container?.viewContext
-        return newContext
-        }()
-    
     private var fetchedResultsController: NSFetchedResultsController<Room>? {
         didSet {
             do {
@@ -160,7 +154,7 @@ class RoomsTableViewController: FetchedResultsTableViewController, UISplitViewCo
     
     func deleteRow(at indexPath: IndexPath) {
         print("Delete Row")
-        if let room = fetchedResultsController?.object(at: indexPath), let context = self.container?.viewContext {
+        if let room = fetchedResultsController?.object(at: indexPath), let context = room.managedObjectContext {
             room.delete(in: context)  { [weak self] (error) in
                 if let error = error {
                     print("Error deleting room: \(error)")
@@ -181,10 +175,10 @@ class RoomsTableViewController: FetchedResultsTableViewController, UISplitViewCo
             }
         }
         if segue.identifier == Storyboard.AddEditRoomSegue, let dvc = segue.destination.contentViewController as? EditRoomViewController {
-            if let room = sender as? Room, let editRoom = scratchpadContext.object(with: room.objectID) as? Room {
-               dvc.room = editRoom
-            } else {
-                dvc.room = Room(context: scratchpadContext)
+            if let room = sender as? Room {
+               dvc.room = room
+            } else if let context = container?.viewContext {
+                dvc.room = Room(context: context)
             }
         }
     }
@@ -198,33 +192,23 @@ class RoomsTableViewController: FetchedResultsTableViewController, UISplitViewCo
     
     @IBAction func cancelEditRoom(segue: UIStoryboardSegue) {
         print("Canceled Add/Edit")
-        scratchpadContext.rollback()
+        container?.viewContext.rollback()
     }
     
     @IBAction func doneEditRoom(segue: UIStoryboardSegue) {
         print("Done Adding/Editing Room")
-        if let svc = segue.source as? EditRoomViewController, let room = svc.room {
+        if let room = (segue.source as? EditRoomViewController)?.room, let context =  room.managedObjectContext {
             room.saveToAPI() { [weak self] (error) in
-                self?.scratchpadContext.perform {
+                context.perform {
                     if let error = error {
-                        self?.scratchpadContext.rollback()
+                        context.rollback()
                         print ("Error saving edit to API: \(error)")
                         DispatchQueue.main.async {
                             self?.presentErrorAlert(withMessage: "Error Saving Changes to API.")
                         }
                     } else {
                         do {
-                            try self?.scratchpadContext.save()
-                            self?.container?.viewContext.performAndWait {
-                                do {
-                                    try self?.container?.viewContext.save()
-                                } catch {
-                                    print("Error saving context: \(error)")
-                                    DispatchQueue.main.async {
-                                        self?.presentErrorAlert(withMessage: "Error saving changes locally.")
-                                    }
-                                }
-                            }
+                            try context.save()
                         } catch {
                             print("Error saving context: \(error)")
                             DispatchQueue.main.async {
