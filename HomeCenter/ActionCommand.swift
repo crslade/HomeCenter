@@ -35,6 +35,15 @@ class ActionCommand: NSManagedObject {
     
     // MARK: - Utility Methods
     
+    func convertToDict() -> [String: Any] {
+        let dict: [String: Any] = [
+            JsonKeys.paramID: self.paramID ?? "",
+            JsonKeys.value: self.paramValue ?? ""
+        ]
+        
+        return dict
+    }
+    
     private struct JsonKeys {
         static let paramID = "paramID"
         static let value = "paramValue"

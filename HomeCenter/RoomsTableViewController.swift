@@ -21,9 +21,10 @@ class RoomsTableViewController: FetchedResultsTableViewController, UISplitViewCo
     
     private var needsAPIKeys: Bool = false
     
-    private lazy var backgroundContext: NSManagedObjectContext? = {
-        [weak self] in
-            return container?.newBackgroundContext()
+    private lazy var scratchpadContext: NSManagedObjectContext = {
+        let newContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
+        newContext.parent = self.container?.viewContext
+        return newContext
         }()
     
     private var fetchedResultsController: NSFetchedResultsController<Room>? {
@@ -159,7 +160,7 @@ class RoomsTableViewController: FetchedResultsTableViewController, UISplitViewCo
     
     func deleteRow(at indexPath: IndexPath) {
         print("Delete Row")
-        if let room = fetchedResultsController?.object(at: indexPath), let context = backgroundContext {
+        if let room = fetchedResultsController?.object(at: indexPath), let context = self.container?.viewContext {
             room.delete(in: context)  { [weak self] (error) in
                 if let error = error {
                     print("Error deleting room: \(error)")
@@ -175,16 +176,15 @@ class RoomsTableViewController: FetchedResultsTableViewController, UISplitViewCo
         if segue.identifier == Storyboard.DeviceSegue, let cell = sender as? UITableViewCell {
             if let devicesTVC = segue.destination as? DevicesTableViewController {
                 if let indexPath = tableView.indexPath(for: cell) {
-                    print("Setting room")
                     devicesTVC.room = fetchedResultsController?.object(at: indexPath)
                 }
             }
         }
         if segue.identifier == Storyboard.AddEditRoomSegue, let dvc = segue.destination.contentViewController as? EditRoomViewController {
-            if let room = sender as? Room, let context = backgroundContext, let editRoom = context.object(with: room.objectID) as? Room {
+            if let room = sender as? Room, let editRoom = scratchpadContext.object(with: room.objectID) as? Room {
                dvc.room = editRoom
-            } else if let context = backgroundContext {
-                dvc.room = Room(context: context)
+            } else {
+                dvc.room = Room(context: scratchpadContext)
             }
         }
     }
@@ -198,25 +198,33 @@ class RoomsTableViewController: FetchedResultsTableViewController, UISplitViewCo
     
     @IBAction func cancelEditRoom(segue: UIStoryboardSegue) {
         print("Canceled Add/Edit")
-        backgroundContext?.reset()
+        scratchpadContext.rollback()
     }
     
     @IBAction func doneEditRoom(segue: UIStoryboardSegue) {
         print("Done Adding/Editing Room")
         if let svc = segue.source as? EditRoomViewController, let room = svc.room {
-            room.saveToAPI(with: { [weak self] (error) in
-                if let error = error {
-                    print ("Error saving edit to API: \(error)")
-                    DispatchQueue.main.async {
-                        self?.presentErrorAlert(withMessage: "Error Saving Changes to API.")
-                    }
-                    self?.backgroundContext?.perform {
-                        self?.backgroundContext?.reset()
-                    }
-                } else {
-                    self?.backgroundContext?.perform {
+            room.saveToAPI() { [weak self] (error) in
+                self?.scratchpadContext.perform {
+                    if let error = error {
+                        self?.scratchpadContext.rollback()
+                        print ("Error saving edit to API: \(error)")
+                        DispatchQueue.main.async {
+                            self?.presentErrorAlert(withMessage: "Error Saving Changes to API.")
+                        }
+                    } else {
                         do {
-                            try self?.backgroundContext?.save()
+                            try self?.scratchpadContext.save()
+                            self?.container?.viewContext.performAndWait {
+                                do {
+                                    try self?.container?.viewContext.save()
+                                } catch {
+                                    print("Error saving context: \(error)")
+                                    DispatchQueue.main.async {
+                                        self?.presentErrorAlert(withMessage: "Error saving changes locally.")
+                                    }
+                                }
+                            }
                         } catch {
                             print("Error saving context: \(error)")
                             DispatchQueue.main.async {
@@ -225,7 +233,7 @@ class RoomsTableViewController: FetchedResultsTableViewController, UISplitViewCo
                         }
                     }
                 }
-            })
+            }
         }
     }
     

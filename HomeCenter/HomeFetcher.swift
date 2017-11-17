@@ -112,6 +112,10 @@ class HomeFetcher: NSObject
         fetchArray(for: "/actions", with: completionHandler)
     }
     
+    class func addAction(_ actionData: String, with completionHandler: @escaping ([String: Any]?, Error?) -> Void) {
+        sendRequest(withData: actionData, toPath: "/actions", withMethod: "POST", with: completionHandler)
+    }
+    
     // MARK: - Helper Methods
     
     //expects object back, not an array

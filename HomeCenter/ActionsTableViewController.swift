@@ -42,6 +42,12 @@ class ActionsTableViewController: FetchedResultsTableViewController, UISplitView
         }
     }
 
+    private lazy var scratchpadContext: NSManagedObjectContext = {
+        let newContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
+        newContext.parent = self.container?.viewContext
+        return newContext
+        }()
+    
     // MARK: - UI
     
     private func updateUI() {
@@ -128,15 +134,69 @@ class ActionsTableViewController: FetchedResultsTableViewController, UISplitView
     }
     
     // MARK: - Navigation
+    
+    @IBAction func cancelEditAction(segue: UIStoryboardSegue) {
+        print("Cancel Edit Action")
+        scratchpadContext.rollback()
+//        if let editAction = (segue.source as? EditActionViewController)?.action {
+//            scratchpadContext.perform { [weak self] in
+//                self?.scratchpadContext.delete(editAction)
+//            }
+//        }
+    }
+    
+    @IBAction func doneEditAction(segue: UIStoryboardSegue) {
+        print("Done Edit Action")
+        if let editAction = (segue.source as? EditActionViewController)?.action {
+            editAction.saveToAPI() {[weak self] (error) in
+                self?.scratchpadContext.perform {
+                    if let error = error {
+                        self?.scratchpadContext.rollback()
+                        print("Error saving to API: \(error)")
+                        DispatchQueue.main.async {
+                            self?.presentErrorAlert(withMessage: "Error Saving changes locally.")
+                        }
+                    } else {
+                        do {
+                            try self?.scratchpadContext.save()
+                            self?.container?.viewContext.performAndWait {
+                                do {
+                                    try self?.container?.viewContext.save()
+                                } catch {
+                                    print("Couldn't save view context: \(error)")
+                                    DispatchQueue.main.async {
+                                        self?.presentErrorAlert(withMessage: "Error saving changes locally.")
+                                    }
+                                }
+                            }
+                        } catch {
+                            print("Coundn't save child context: \(error)")
+                            DispatchQueue.main.async {
+                                self?.presentErrorAlert(withMessage: "Error saving changes locally.")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+        print("Ident: \(segue.identifier!)")
+        if segue.identifier == Storyboard.ActionDetailSegue, let dvc = segue.destination.contentViewController as? ActionTableViewController {
+            if let cell = sender as? UITableViewCell, let indexPath = tableView?.indexPath(for: cell) {
+                dvc.action = fetchedResultsController?.object(at: indexPath)
+            }
+        }
+        if segue.identifier == Storyboard.AddActionSegue, let dvc = segue.destination.contentViewController as? EditActionViewController {
+            dvc.action = Action(context: scratchpadContext)
+        }
     }
 
     private struct Storyboard {
         static let ActionCell = "Action Cell"
+        static let ActionDetailSegue = "Show Action"
+        static let AddActionSegue = "Add Action"
     }
 }
 

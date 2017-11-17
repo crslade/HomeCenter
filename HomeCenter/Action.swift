@@ -84,6 +84,32 @@ class Action: NSManagedObject {
         }
     }
     
+    func saveToAPI(with completionHandler: @escaping (Error?) -> Void) {
+        do {
+            if let actionID = uuid {
+                print("Should update action: \(actionID)")
+                completionHandler(nil)
+            } else if let actionJson = try convertToJson() {
+                HomeFetcher.addAction(actionJson) {[weak self] (actionData, error) in
+                    if let error = error {
+                        completionHandler(error)
+                    } else if let actionDict = actionData {
+                        self?.managedObjectContext?.perform {
+                            self?.updateValues(with: actionDict)
+                        }
+                        completionHandler(nil)
+                    } else {
+                        print("No error or data in Action - savetoapi?? new")
+                        completionHandler(HomeFetcherError.DownloadError("No Data"))
+                    }
+                }
+            }
+        } catch {
+            print("Error converting to Json: \(error)")
+            completionHandler(error)
+        }
+    }
+    
     // MARK: - Utility Methods
     
     func updateValues(with actionData: [String: Any]) {
@@ -123,6 +149,23 @@ class Action: NSManagedObject {
                 }
             }
         }
+    }
+    
+    private func convertToJson() throws -> String? {
+        var commandArray: [Any] = []
+        if let commands = commands {
+            for command in commands {
+                if let command = command as? ActionCommand {
+                    commandArray.append(command.convertToDict())
+                }
+            }
+        }
+        let actionDict: [String: Any] = [
+            JsonKeys.name: self.name ?? "",
+            JsonKeys.commands: commandArray
+        ]
+        let jsonData = try JSONSerialization.data(withJSONObject: actionDict, options: .prettyPrinted)
+        return String(data: jsonData, encoding: .utf8)
     }
     
     private struct JsonKeys {

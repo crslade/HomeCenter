@@ -107,7 +107,6 @@ class Device: NSManagedObject
                         completionHandler(error)
                     } else if let deviceDict = deviceData {
                         self?.managedObjectContext?.perform {
-                            print("Updating device with id")
                             self?.updateValues(with: deviceDict)
                         }
                         completionHandler(nil)
