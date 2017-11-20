@@ -24,10 +24,10 @@ class DevicesTableViewController: FetchedResultsTableViewController, UISplitView
     
     // MARK: - Internal Data
     
-    private lazy var backgroundContext: NSManagedObjectContext? = {
-        [weak self] in
-            return container?.newBackgroundContext()
-        }()
+//    private lazy var backgroundContext: NSManagedObjectContext? = {
+//        [weak self] in
+//            return container?.newBackgroundContext()
+//        }()
     
     // MARK:  - Lifecycle Methods
     
@@ -122,9 +122,9 @@ class DevicesTableViewController: FetchedResultsTableViewController, UISplitView
     
     private func deleteRow(at indexPath: IndexPath) {
         print("Delete Row")
-        if let device = fetchedResultsController?.object(at: indexPath), let bgContext = container?.newBackgroundContext() {
+        if let device = fetchedResultsController?.object(at: indexPath), let context = device.managedObjectContext {
             print("Deleting device")
-            device.delete(in: bgContext) { [weak self] (error) in
+            device.delete(in: context) { [weak self] (error) in
                 if let error = error {
                     print("Error deleting device: \(error)")
                     self?.presentErrorAlert(withMessage: "Error deleting device")
@@ -183,14 +183,12 @@ class DevicesTableViewController: FetchedResultsTableViewController, UISplitView
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == Storyboard.AddEditDeviceSegue, let dvc = segue.destination.contentViewController as? EditDeviceViewController {
-            if let context = backgroundContext {
-                if let device = sender as? Device {
-                    dvc.device = context.object(with: device.objectID) as? Device
-                } else {
-                    dvc.device = Device(context: context)
-                    if room != nil, let bgcontextRoom = context.object(with: room!.objectID) as? Room {
-                        dvc.device!.room = bgcontextRoom
-                    }
+            if let device = sender as? Device {
+                dvc.device = device
+            } else if let context = container?.viewContext {
+                dvc.device = Device(context: context)
+                if room != nil {
+                    dvc.device!.room = room
                 }
             }
         }
@@ -204,25 +202,23 @@ class DevicesTableViewController: FetchedResultsTableViewController, UISplitView
     
     @IBAction func cancelEditDevice(segue: UIStoryboardSegue) {
         print("Cancel Editing")
-        backgroundContext?.reset()
+        container?.viewContext.rollback()
     }
     
     @IBAction func doneEditDevice(segue: UIStoryboardSegue) {
         print("Done Editing")
-        if let device = (segue.source as? EditDeviceViewController)?.device {
+        if let device = (segue.source as? EditDeviceViewController)?.device, let context = device.managedObjectContext {
             device.saveToAPI {[weak self] (error) in
-                if let error = error {
-                    print("Error saving edit to API: \(error)")
-                    DispatchQueue.main.async {
-                        self?.presentErrorAlert(withMessage: "Error saving changes to API.")
-                    }
-                    self?.backgroundContext?.perform {
-                        self?.backgroundContext?.reset()
-                    }
-                } else {
-                    self?.backgroundContext?.perform {
+                context.perform {
+                    if let error = error {
+                        context.rollback()
+                        print("Error saving edit to API: \(error)")
+                        DispatchQueue.main.async {
+                            self?.presentErrorAlert(withMessage: "Error saving changes to API.")
+                        }
+                    } else {
                         do {
-                            try self?.backgroundContext?.save()
+                            try context.save()
                         } catch {
                             print("Error Saving context: \(error)")
                             DispatchQueue.main.async {
