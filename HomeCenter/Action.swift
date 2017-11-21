@@ -86,8 +86,16 @@ class Action: NSManagedObject {
     
     func saveToAPI(with completionHandler: @escaping (Error?) -> Void) {
         do {
-            if let actionID = uuid {
+            if let actionID = uuid, let deviceData = try convertToJson() {
                 print("Should update action: \(actionID)")
+                HomeFetcher.editAction(with: actionID, actionData: deviceData) { (retData, error) in
+                    if let error = error {
+                        completionHandler(error)
+                    } else if let _ = retData {
+                        print("Updated Succeeded")
+                        completionHandler(nil)
+                    }
+                }
                 completionHandler(nil)
             } else if let actionJson = try convertToJson() {
                 HomeFetcher.addAction(actionJson) {[weak self] (actionData, error) in
@@ -107,6 +115,29 @@ class Action: NSManagedObject {
         } catch {
             print("Error converting to Json: \(error)")
             completionHandler(error)
+        }
+    }
+    
+    func delete(in context: NSManagedObjectContext, with completionHandler: @escaping (Error?) -> Void) {
+        if let uuid = self.uuid {
+            HomeFetcher.deleteAction(withUUID: uuid) { (error) in
+                if let error = error {
+                    completionHandler(error)
+                } else {
+                    context.perform {
+                        context.delete(self)
+                        do {
+                            try context.save()
+                            completionHandler(nil)
+                        } catch {
+                            print("Error Saving Context")
+                            completionHandler(error)
+                        }
+                    }
+                }
+            }
+        } else {
+            completionHandler(HomeFetcherError.MissingAPIValues("No uuid to delete."))
         }
     }
     

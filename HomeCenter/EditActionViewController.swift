@@ -119,6 +119,7 @@ class EditActionViewController: UIViewController, UITextFieldDelegate, UIPickerV
     // MARK: - UI
     
     private func updateUI() {
+        nameTextField?.text = actionName
         if isAddingCommand {
             pickerStackView?.isHidden = false
             cancelAddCommandButton?.isHidden = false

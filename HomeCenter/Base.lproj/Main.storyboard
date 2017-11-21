@@ -772,7 +772,7 @@
                     <navigationItem key="navigationItem" title="Actions" id="rEh-xM-tlg">
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="SXK-U2-wFQ">
                             <connections>
-                                <segue destination="ke4-XX-0WU" kind="presentation" identifier="Add Action" id="rS3-Ev-UUD"/>
+                                <segue destination="ke4-XX-0WU" kind="presentation" identifier="Add Edit Action" id="rS3-Ev-UUD"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>

@@ -84,8 +84,8 @@ class HomeFetcher: NSObject
         sendRequest(withData: deviceData, toPath: "/devices", withMethod: "POST", with: completionHandler)
     }
     
-    class func editDevice(with uuid: String, deviceData: String, compleationHandler: @escaping ([String: Any]?, Error?) -> Void) {
-        sendRequest(withData: deviceData, toPath: "/devices/"+uuid, withMethod: "PATCH", with: compleationHandler)
+    class func editDevice(with uuid: String, deviceData: String, completionHandler: @escaping ([String: Any]?, Error?) -> Void) {
+        sendRequest(withData: deviceData, toPath: "/devices/"+uuid, withMethod: "PATCH", with: completionHandler)
     }
     
     class func deleteDevice(withUUID uuid: String,with completionHandler: @escaping (Error?) -> Void) {
@@ -114,6 +114,14 @@ class HomeFetcher: NSObject
     
     class func addAction(_ actionData: String, with completionHandler: @escaping ([String: Any]?, Error?) -> Void) {
         sendRequest(withData: actionData, toPath: "/actions", withMethod: "POST", with: completionHandler)
+    }
+    
+    class func editAction(with uuid: String, actionData: String, completionHandler: @escaping ([String: Any]?, Error?) -> Void) {
+        sendRequest(withData: actionData, toPath: "/actions/"+uuid, withMethod: "PATCH", with: completionHandler)
+    }
+    
+    class func deleteAction(withUUID uuid: String, with completionHandler: @escaping (Error?) -> Void) {
+        sendDelete(for: "/actions/"+uuid, with: completionHandler)
     }
     
     // MARK: - Helper Methods

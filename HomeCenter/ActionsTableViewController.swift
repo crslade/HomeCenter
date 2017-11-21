@@ -107,19 +107,39 @@ class ActionsTableViewController: FetchedResultsTableViewController, UISplitView
         return cell
     }
 
-
-
-    /*
-    // Override to support editing the table view.
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            // Delete the row from the data source
-            tableView.deleteRows(at: [indexPath], with: .fade)
-        } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
+    override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+        let editAction = UITableViewRowAction(style: .default, title: "Edit") {[weak self] (rowAction, indexPath) in
+            self?.editRow(at: indexPath)
+        }
+        editAction.backgroundColor = .blue
+        let deleteAction = UITableViewRowAction(style: .destructive, title: "Delete") {[weak self] (rowAction, indexPath) in
+            self?.deleteRow(at: indexPath)
+        }
+        
+        return [deleteAction,editAction]
     }
-    */
+
+    // MARK: - TableViewRowAction Handler Methods
+    
+    private func deleteRow(at indexPath: IndexPath) {
+        print("Delete Row")
+        if let action = fetchedResultsController?.object(at: indexPath), let context = action.managedObjectContext {
+            action.delete(in: context) {[weak self] (error) in
+                if let error = error {
+                    print("Error deleting action: \(error)")
+                    self?.presentErrorAlert(withMessage: "Error deleting device.")
+                }
+            }
+        }
+    }
+    
+    private func editRow(at indexPath: IndexPath) {
+        print("Edit Row")
+        if let action = fetchedResultsController?.object(at: indexPath) {
+            performSegue(withIdentifier: Storyboard.AddEditActionSegue, sender: action)
+        }
+    }
+    
 
     // MARK: - UISplitViewControllerDelegate
     
@@ -161,22 +181,25 @@ class ActionsTableViewController: FetchedResultsTableViewController, UISplitView
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        print("Ident: \(segue.identifier!)")
         if segue.identifier == Storyboard.ActionDetailSegue, let dvc = segue.destination.contentViewController as? ActionTableViewController {
             if let cell = sender as? UITableViewCell, let indexPath = tableView?.indexPath(for: cell) {
                 dvc.action = fetchedResultsController?.object(at: indexPath)
             }
         }
-        if segue.identifier == Storyboard.AddActionSegue, let dvc = segue.destination.contentViewController as? EditActionViewController,
-            let context = container?.viewContext {
-            dvc.action = Action(context: context)
+        if segue.identifier == Storyboard.AddEditActionSegue, let dvc = segue.destination.contentViewController as? EditActionViewController {
+            if let action = sender as? Action {
+                dvc.action = action
+            } else if let context = container?.viewContext {
+                dvc.action = Action(context: context)
+            }
         }
+
     }
 
     private struct Storyboard {
         static let ActionCell = "Action Cell"
         static let ActionDetailSegue = "Show Action"
-        static let AddActionSegue = "Add Action"
+        static let AddEditActionSegue = "Add Edit Action"
     }
 }
 

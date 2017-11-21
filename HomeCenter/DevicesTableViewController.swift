@@ -123,7 +123,6 @@ class DevicesTableViewController: FetchedResultsTableViewController, UISplitView
     private func deleteRow(at indexPath: IndexPath) {
         print("Delete Row")
         if let device = fetchedResultsController?.object(at: indexPath), let context = device.managedObjectContext {
-            print("Deleting device")
             device.delete(in: context) { [weak self] (error) in
                 if let error = error {
                     print("Error deleting device: \(error)")
