@@ -34,6 +34,33 @@ class DeviceTableViewController: UITableViewController {
         tableView?.reloadData()
     }
     
+    @IBAction func refreshRequested() {
+        refreshDevice()
+    }
+    
+    // MARK: - API
+    
+    private func refreshDevice() {
+        if let device = device {
+            self.refreshControl?.beginRefreshing()
+            print("Updating Device")
+            device.updateFromApi() {[weak self] (error) in
+                if let error = error {
+                    print("Error refreshing device: \(error)")
+                    DispatchQueue.main.async {
+                        self?.presentErrorAlert(withMessage: "Error Refreshing Device.")
+                        self?.refreshControl?.endRefreshing()
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        self?.tableView?.reloadData()
+                        self?.refreshControl?.endRefreshing()
+                    }
+                }
+            }
+        }
+    }
+    
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -78,15 +105,5 @@ class DeviceTableViewController: UITableViewController {
         static let DeviceCell = "Device Title Cell"
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
 
 }

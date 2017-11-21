@@ -18,7 +18,6 @@ extension UIViewController {
     }
     
     func presentErrorAlert(withMessage message: String) {
-        print("Presenting Error with message: \(message)")
         let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
         self.present(alert, animated: true, completion: nil)

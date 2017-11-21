@@ -34,6 +34,25 @@ class ActionTableViewController: UITableViewController {
         tableView.reloadData()
     }
 
+    @IBAction func fireRequested(_ sender: UIBarButtonItem) {
+        if let action = action {
+            action.fire() {[weak self] (error) in
+                if let error = error {
+                    print("Error Firing Action: \(error)")
+                    DispatchQueue.main.async {
+                        self?.presentErrorAlert(withMessage: "Error firing action.")
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        let alert = UIAlertController(title: "Success", message: "Action Fired", preferredStyle: .alert)
+                        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                        self?.present(alert, animated: true, completion: nil)
+                    }
+                }
+            }
+        }
+    }
+    
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {

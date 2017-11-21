@@ -76,8 +76,11 @@ class HomeFetcher: NSObject
     }
     
     class func fetchDevices(completionHandler: @escaping ([Any]?, Error?) -> Void) {
-        let path = "/devices"
-        fetchArray(for: path, with: completionHandler)
+        fetchArray(for: "/devices", with: completionHandler)
+    }
+    
+    class func fetchDevice(for deviceUUID: String, completionHandler: @escaping ([String: Any]?, Error?) -> Void) {
+        sendRequest(withData: nil, toPath: "/devices/"+deviceUUID, withMethod: "GET", with: completionHandler)
     }
     
     class func addDevice(_ deviceData: String, with completionHandler: @escaping ([String: Any]?, Error?) -> Void) {
@@ -124,10 +127,20 @@ class HomeFetcher: NSObject
         sendDelete(for: "/actions/"+uuid, with: completionHandler)
     }
     
+    class func fireAction(withUUID uuid: String, with completionHandler: @escaping (Error?) -> Void) {
+        sendRequest(withData: nil, toPath: "/actions/"+uuid, withMethod: "POST") { (data, error) in
+            if let error = error {
+                completionHandler(error)
+            } else {
+                completionHandler(nil)
+            }
+        }
+    }
+    
     // MARK: - Helper Methods
     
     //expects object back, not an array
-    private class func sendRequest(withData data: String, toPath path: String, withMethod method: String, with completionHandler: @escaping ([String: Any]?, Error?) -> Void) {
+    private class func sendRequest(withData data: String?, toPath path: String, withMethod method: String, with completionHandler: @escaping ([String: Any]?, Error?) -> Void) {
         guard let apiUrl = KeychainAccess.retrieveAPIUrl(), let apiKey = KeychainAccess.retrieveAPIKey() else {
             completionHandler(nil,HomeFetcherError.MissingAPIValues("Missing API URL/KEY"))
             return
@@ -140,7 +153,9 @@ class HomeFetcher: NSObject
         var request = URLRequest(url: url)
         request.setValue(apiKey, forHTTPHeaderField: "X-API-KEY")
         request.httpMethod = method
-        request.httpBody = data.data(using: .utf8)
+        if let data = data {
+            request.httpBody = data.data(using: .utf8)
+        }
         (URLSession.shared.dataTask(with: request) { (data, response, error) in
             if let error = error {
                 completionHandler(nil, error)

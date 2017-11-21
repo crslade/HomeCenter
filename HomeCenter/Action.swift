@@ -118,6 +118,14 @@ class Action: NSManagedObject {
         }
     }
     
+    func fire(with completionHandler: @escaping (Error?) -> Void) {
+        if let actionID = uuid {
+            HomeFetcher.fireAction(withUUID: actionID, with: completionHandler)
+        } else {
+            completionHandler(HomeFetcherError.MissingAPIValues("No UUID for action"))
+        }
+    }
+    
     func delete(in context: NSManagedObjectContext, with completionHandler: @escaping (Error?) -> Void) {
         if let uuid = self.uuid {
             HomeFetcher.deleteAction(withUUID: uuid) { (error) in

@@ -115,8 +115,12 @@ class ActionsTableViewController: FetchedResultsTableViewController, UISplitView
         let deleteAction = UITableViewRowAction(style: .destructive, title: "Delete") {[weak self] (rowAction, indexPath) in
             self?.deleteRow(at: indexPath)
         }
+        let fireAction = UITableViewRowAction(style: .default, title: "Fire") {[weak self] (rowAction, indexPath) in
+            self?.fireRow(at: indexPath)
+        }
+        fireAction.backgroundColor = .lightGray
         
-        return [deleteAction,editAction]
+        return [fireAction,editAction,deleteAction]
     }
 
     // MARK: - TableViewRowAction Handler Methods
@@ -137,6 +141,26 @@ class ActionsTableViewController: FetchedResultsTableViewController, UISplitView
         print("Edit Row")
         if let action = fetchedResultsController?.object(at: indexPath) {
             performSegue(withIdentifier: Storyboard.AddEditActionSegue, sender: action)
+        }
+    }
+    
+    private func fireRow(at indexPath: IndexPath) {
+        print("Fire Row")
+        if let action = fetchedResultsController?.object(at: indexPath) {
+            action.fire() {[weak self] (error) in
+                if let error = error {
+                    print("Error firing action: \(error)")
+                    DispatchQueue.main.async {
+                        self?.presentErrorAlert(withMessage: "Error Firing Action")
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        let alert = UIAlertController(title: "Success", message: "Action Fired", preferredStyle: .alert)
+                        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                        self?.present(alert, animated: true, completion: nil)
+                    }
+                }
+            }
         }
     }
     

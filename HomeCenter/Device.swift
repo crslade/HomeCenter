@@ -146,6 +146,23 @@ class Device: NSManagedObject
         }
     }
     
+    func updateFromApi(with completionHandler: @escaping (Error?) -> Void) {
+        if let deviceID = uuid {
+            HomeFetcher.fetchDevice(for: deviceID) {[weak self] (devData, error) in
+                if let error = error {
+                    completionHandler(error)
+                } else if let devDict = devData {
+                    self?.updateValues(with: devDict)
+                    completionHandler(nil)
+                } else {
+                    completionHandler(HomeFetcherError.DownloadError("No Error or Data."))
+                }
+            }
+        } else {
+            completionHandler(HomeFetcherError.MissingAPIValues("No uuid for device."))
+        }
+    }
+    
     // MARK: - JSON Properties
     
     func loadJsonProperties(completionHandler: @escaping (Error?) -> Void) {
