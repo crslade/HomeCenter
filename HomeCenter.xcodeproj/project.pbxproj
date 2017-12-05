@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		541134351F9FFC9600D67920 /* APIInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 541134341F9FFC9600D67920 /* APIInfo.swift */; };
 		543C6D281FB258030000BC3E /* EditDeviceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 543C6D271FB258030000BC3E /* EditDeviceViewController.swift */; };
+		543F69FF1FD7240B00A6354F /* ConditionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 543F69FE1FD7240B00A6354F /* ConditionViewController.swift */; };
 		544721061FA7961C000BC97D /* EditRoomViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 544721051FA7961C000BC97D /* EditRoomViewController.swift */; };
 		5459D35B1FB6316200EE66D4 /* Parameter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5459D35A1FB6316200EE66D4 /* Parameter.swift */; };
 		545E030A1F9FD9CE008FDE18 /* FetchedResultsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 545E03091F9FD9CE008FDE18 /* FetchedResultsTableViewController.swift */; };
@@ -31,6 +32,8 @@
 		548437021FBBAFD6006F6AA9 /* ActionCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 548437011FBBAFD6006F6AA9 /* ActionCommand.swift */; };
 		54D02D791FBCBB7400223675 /* ActionTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54D02D781FBCBB7400223675 /* ActionTableViewController.swift */; };
 		54D02D7B1FBCED1400223675 /* EditActionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54D02D7A1FBCED1400223675 /* EditActionViewController.swift */; };
+		54F754CC1FD1F17000EB0AC4 /* ConditionsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54F754CB1FD1F17000EB0AC4 /* ConditionsTableViewController.swift */; };
+		54F754CE1FD1FD9100EB0AC4 /* Condition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54F754CD1FD1FD9100EB0AC4 /* Condition.swift */; };
 		54FF29A11F9FDBB500584EB8 /* RoomsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54FF29A01F9FDBB500584EB8 /* RoomsTableViewController.swift */; };
 		54FF29A31F9FDE3900584EB8 /* UIViewControllerUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54FF29A21F9FDE3900584EB8 /* UIViewControllerUtilities.swift */; };
 /* End PBXBuildFile section */
@@ -38,6 +41,7 @@
 /* Begin PBXFileReference section */
 		541134341F9FFC9600D67920 /* APIInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIInfo.swift; sourceTree = "<group>"; };
 		543C6D271FB258030000BC3E /* EditDeviceViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditDeviceViewController.swift; sourceTree = "<group>"; };
+		543F69FE1FD7240B00A6354F /* ConditionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConditionViewController.swift; sourceTree = "<group>"; };
 		544721051FA7961C000BC97D /* EditRoomViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditRoomViewController.swift; sourceTree = "<group>"; };
 		5459D35A1FB6316200EE66D4 /* Parameter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parameter.swift; sourceTree = "<group>"; };
 		545E03091F9FD9CE008FDE18 /* FetchedResultsTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchedResultsTableViewController.swift; sourceTree = "<group>"; };
@@ -63,6 +67,8 @@
 		548437011FBBAFD6006F6AA9 /* ActionCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionCommand.swift; sourceTree = "<group>"; };
 		54D02D781FBCBB7400223675 /* ActionTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionTableViewController.swift; sourceTree = "<group>"; };
 		54D02D7A1FBCED1400223675 /* EditActionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditActionViewController.swift; sourceTree = "<group>"; };
+		54F754CB1FD1F17000EB0AC4 /* ConditionsTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConditionsTableViewController.swift; sourceTree = "<group>"; };
+		54F754CD1FD1FD9100EB0AC4 /* Condition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Condition.swift; sourceTree = "<group>"; };
 		54FF29A01F9FDBB500584EB8 /* RoomsTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomsTableViewController.swift; sourceTree = "<group>"; };
 		54FF29A21F9FDE3900584EB8 /* UIViewControllerUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIViewControllerUtilities.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -98,6 +104,8 @@
 				548436FD1FBB7902006F6AA9 /* ActionsTableViewController.swift */,
 				54D02D781FBCBB7400223675 /* ActionTableViewController.swift */,
 				54D02D7A1FBCED1400223675 /* EditActionViewController.swift */,
+				54F754CB1FD1F17000EB0AC4 /* ConditionsTableViewController.swift */,
+				543F69FE1FD7240B00A6354F /* ConditionViewController.swift */,
 				5465AA2B1FA27879000E47CD /* APIInfoViewController.swift */,
 				54802C6A1F9E58E3005FF2C7 /* ViewController.swift */,
 				54FF29A21F9FDE3900584EB8 /* UIViewControllerUtilities.swift */,
@@ -157,6 +165,7 @@
 				5459D35A1FB6316200EE66D4 /* Parameter.swift */,
 				548436FF1FBB7BB7006F6AA9 /* Action.swift */,
 				548437011FBBAFD6006F6AA9 /* ActionCommand.swift */,
+				54F754CD1FD1FD9100EB0AC4 /* Condition.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -243,14 +252,17 @@
 				54802C6B1F9E58E3005FF2C7 /* ViewController.swift in Sources */,
 				548437021FBBAFD6006F6AA9 /* ActionCommand.swift in Sources */,
 				5465AA2C1FA27879000E47CD /* APIInfoViewController.swift in Sources */,
+				543F69FF1FD7240B00A6354F /* ConditionViewController.swift in Sources */,
 				548436FC1FBA2B3D006F6AA9 /* DeviceTableViewController.swift in Sources */,
 				541134351F9FFC9600D67920 /* APIInfo.swift in Sources */,
 				54FF29A31F9FDE3900584EB8 /* UIViewControllerUtilities.swift in Sources */,
 				543C6D281FB258030000BC3E /* EditDeviceViewController.swift in Sources */,
 				54802C7E1F9E64C1005FF2C7 /* Room.swift in Sources */,
+				54F754CC1FD1F17000EB0AC4 /* ConditionsTableViewController.swift in Sources */,
 				548437001FBB7BB7006F6AA9 /* Action.swift in Sources */,
 				54D02D791FBCBB7400223675 /* ActionTableViewController.swift in Sources */,
 				548436FA1FBA271A006F6AA9 /* ParameterTableViewCell.swift in Sources */,
+				54F754CE1FD1FD9100EB0AC4 /* Condition.swift in Sources */,
 				5459D35B1FB6316200EE66D4 /* Parameter.swift in Sources */,
 				545E030A1F9FD9CE008FDE18 /* FetchedResultsTableViewController.swift in Sources */,
 				54802C691F9E58E3005FF2C7 /* AppDelegate.swift in Sources */,

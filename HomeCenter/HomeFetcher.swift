@@ -137,6 +137,12 @@ class HomeFetcher: NSObject
         }
     }
     
+    // MARK: - Conditions
+    
+    class func fetchConditions(with completionHandler: @escaping ([Any]?, Error?) -> Void) {
+        fetchArray(for: "/conditions", with: completionHandler)
+    }
+    
     // MARK: - Helper Methods
     
     //expects object back, not an array

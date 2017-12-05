@@ -70,7 +70,7 @@ class ActionsTableViewController: FetchedResultsTableViewController, UISplitView
             self.refreshControl?.beginRefreshing()
             Action.syncActions(in: bgContext) {[weak self] (error) in
                 if let error = error {
-                    print("Error syncing rooms: \(error)")
+                    print("Error syncing actions: \(error)")
                     DispatchQueue.main.async {
                         self?.presentErrorAlert(withMessage: "Could not sync actions.")
                     }

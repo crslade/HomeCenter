@@ -24,7 +24,7 @@ class Action: NSManagedObject {
         do {
             let matches = try context.fetch(request)
             if matches.count > 0 {
-                assert(matches.count == 1, "Action.findOrCreateRoom - database inconsistency")
+                assert(matches.count == 1, "Action.findOrCreateCondition - database inconsistency")
                 action = matches[0]
             } else {
                 print("Creating new action")
@@ -32,7 +32,7 @@ class Action: NSManagedObject {
                 action.uuid = uuid
             }
         } catch {
-            print("Error fetching action in fonorcreateaction \(error)")
+            print("Error fetching action in findorcreateaction \(error)")
             throw error
         }
         //Write or updated values
@@ -40,9 +40,29 @@ class Action: NSManagedObject {
         return action
     }
     
+    class func findAction(for uuid: String, in context: NSManagedObjectContext) throws -> Action? {
+        let request: NSFetchRequest<Action> = Action.fetchRequest()
+        request.predicate = NSPredicate(format: "uuid = %@", uuid)
+        
+        var action: Action?
+        do {
+            let matches = try context.fetch(request)
+            if matches.count > 0 {
+                assert(matches.count == 1, "Action.findAction - database inconsistency")
+                action = matches[0]
+            }
+        } catch {
+            print("Error fetching parameter: \(error)")
+            throw error
+        }
+        
+        return action
+    }
+    
     // MARK: - Sync Methods
     
     class func syncActions(in context: NSManagedObjectContext, with completionHandler: @escaping (Error?) -> Void) {
+        // TODO: Sync Devices first??
         HomeFetcher.fetchActions { (actionsData, error) in
             if let error = error {
                 completionHandler(error)

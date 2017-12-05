@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="13533" systemVersion="17B48" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="13533" systemVersion="17B1002" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="Action" representedClassName=".Action" syncable="YES" codeGenerationType="category">
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="updated_at" optional="YES" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="uuid" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="actions" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Condition" inverseName="action" inverseEntity="Condition" syncable="YES"/>
         <relationship name="commands" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ActionCommand" inverseName="action" inverseEntity="ActionCommand" syncable="YES"/>
     </entity>
     <entity name="ActionCommand" representedClassName=".ActionCommand" syncable="YES" codeGenerationType="category">
@@ -11,6 +12,20 @@
         <attribute name="paramValue" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="action" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Action" inverseName="commands" inverseEntity="Action" syncable="YES"/>
         <relationship name="parameter" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Parameter" inverseName="commands" inverseEntity="Parameter" syncable="YES"/>
+    </entity>
+    <entity name="Condition" representedClassName=".Condition" syncable="YES" codeGenerationType="category">
+        <attribute name="actionID" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="comparison" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="comparisonParam" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="comparisonType" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="comparisonValue" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="paramID" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="tolerance" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="uuid" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="action" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Action" inverseName="actions" inverseEntity="Action" syncable="YES"/>
+        <relationship name="compParameter" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Parameter" inverseName="compParams" inverseEntity="Parameter" syncable="YES"/>
+        <relationship name="parameter" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Parameter" inverseName="directParams" inverseEntity="Parameter" syncable="YES"/>
     </entity>
     <entity name="Device" representedClassName=".Device" syncable="YES" codeGenerationType="category">
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
@@ -28,7 +43,9 @@
         <attribute name="uuid" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="value" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="commands" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ActionCommand" inverseName="parameter" inverseEntity="ActionCommand" syncable="YES"/>
+        <relationship name="compParams" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Condition" inverseName="compParameter" inverseEntity="Condition" syncable="YES"/>
         <relationship name="device" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Device" inverseName="parameters" inverseEntity="Device" syncable="YES"/>
+        <relationship name="directParams" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Condition" inverseName="parameter" inverseEntity="Condition" syncable="YES"/>
     </entity>
     <entity name="Room" representedClassName=".Room" syncable="YES" codeGenerationType="category">
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
@@ -37,10 +54,11 @@
         <relationship name="devices" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Device" inverseName="room" inverseEntity="Device" syncable="YES"/>
     </entity>
     <elements>
-        <element name="Action" positionX="-0" positionY="189" width="128" height="103"/>
+        <element name="Action" positionX="-18" positionY="215" width="128" height="118"/>
         <element name="ActionCommand" positionX="241" positionY="186" width="128" height="105"/>
+        <element name="Condition" positionX="313" positionY="530" width="128" height="223"/>
         <element name="Device" positionX="259" positionY="-72" width="128" height="133"/>
-        <element name="Parameter" positionX="495" positionY="-54" width="128" height="163"/>
+        <element name="Parameter" positionX="495" positionY="-54" width="128" height="193"/>
         <element name="Room" positionX="-18" positionY="-72" width="128" height="103"/>
     </elements>
 </model>
