@@ -110,8 +110,11 @@ class ConditionsTableViewController: FetchedResultsTableViewController, UISplitV
             self?.editRow(at: indexPath)
         }
         editAction.backgroundColor = .blue
+        let deleteAction = UITableViewRowAction(style: .destructive, title: "Delete") {[weak self] (rowAction, indexPath) in
+            self?.deleteRow(at: indexPath)
+        }
         
-        return [editAction]
+        return [editAction,deleteAction]
     }
     
     // MARK: - TableViewRowAction Handler Methods
@@ -120,6 +123,20 @@ class ConditionsTableViewController: FetchedResultsTableViewController, UISplitV
         print("Edit Row")
         if let condition = fetchedResultsController?.object(at: indexPath) {
             performSegue(withIdentifier: Storyboard.AddEditConditionSegue, sender: condition)
+        }
+    }
+    
+    private func deleteRow(at indexPath: IndexPath) {
+        print("Delete Row")
+        if let condtion = fetchedResultsController?.object(at: indexPath), let context = condtion.managedObjectContext {
+            condtion.delete(in: context) {[weak self] (error) in
+                if let error = error {
+                    print("Error deleting condition: \(error)")
+                    DispatchQueue.main.async {
+                        self?.presentErrorAlert(withMessage: "Error deleting condition")
+                    }
+                }
+            }
         }
     }
     

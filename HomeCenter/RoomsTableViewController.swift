@@ -158,7 +158,9 @@ class RoomsTableViewController: FetchedResultsTableViewController, UISplitViewCo
             room.delete(in: context)  { [weak self] (error) in
                 if let error = error {
                     print("Error deleting room: \(error)")
-                    self?.presentErrorAlert(withMessage: "Error deleting room.")
+                    DispatchQueue.main.async {
+                        self?.presentErrorAlert(withMessage: "Error deleting room.")
+                    }
                 }
             }
         }

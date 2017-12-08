@@ -123,6 +123,29 @@ class Condition: NSManagedObject {
         }
     }
     
+    func delete(in context: NSManagedObjectContext, with completionHandler: @escaping (Error?) -> Void) {
+        if let uuid = self.uuid {
+            HomeFetcher.deleteCondition(with: uuid) { (error) in
+                if let error = error {
+                    completionHandler(error)
+                } else {
+                    context.perform {
+                        context.delete(self)
+                        do {
+                            try context.save()
+                            completionHandler(nil)
+                        } catch {
+                            print("Error saving context")
+                            completionHandler(error)
+                        }
+                    }
+                }
+            }
+        } else {
+            completionHandler(HomeFetcherError.MissingAPIValues("No uuid to delete."))
+        }
+    }
+    
     // MARK: - Utility Methods
     
     func updateValues(with conditionData: [String: Any]) {

@@ -131,7 +131,9 @@ class ActionsTableViewController: FetchedResultsTableViewController, UISplitView
             action.delete(in: context) {[weak self] (error) in
                 if let error = error {
                     print("Error deleting action: \(error)")
-                    self?.presentErrorAlert(withMessage: "Error deleting device.")
+                    DispatchQueue.main.async {
+                        self?.presentErrorAlert(withMessage: "Error deleting action.")
+                    }
                 }
             }
         }

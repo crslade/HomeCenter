@@ -377,9 +377,6 @@ class EditConditionViewController: UIViewController, UITextFieldDelegate, UIPick
         didSet {
             if let _ = selectedDevice {
                 parameterPicker?.reloadComponent(PickerComponentNumbers.paramComponent)
-//                if parameters.count > 0 {
-//                    selectedParam = parameters[0]
-//                }
             }
         }
     }

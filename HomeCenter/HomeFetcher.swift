@@ -151,6 +151,10 @@ class HomeFetcher: NSObject
         sendRequest(withData: conditionData, toPath: "/conditions/"+uuid, withMethod: "PATCH", with: completionHandler)
     }
     
+    class func deleteCondition(with uuid: String, with completionHandler: @escaping (Error?) -> Void) {
+        sendDelete(for: "/conditions/"+uuid, with: completionHandler)
+    }
+    
     // MARK: - Helper Methods
     
     //expects object back, not an array
