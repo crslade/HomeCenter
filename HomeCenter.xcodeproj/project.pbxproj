@@ -10,6 +10,7 @@
 		541134351F9FFC9600D67920 /* APIInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 541134341F9FFC9600D67920 /* APIInfo.swift */; };
 		543C6D281FB258030000BC3E /* EditDeviceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 543C6D271FB258030000BC3E /* EditDeviceViewController.swift */; };
 		543F69FF1FD7240B00A6354F /* ConditionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 543F69FE1FD7240B00A6354F /* ConditionViewController.swift */; };
+		543F6A011FD7619F00A6354F /* EditConditionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 543F6A001FD7619F00A6354F /* EditConditionViewController.swift */; };
 		544721061FA7961C000BC97D /* EditRoomViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 544721051FA7961C000BC97D /* EditRoomViewController.swift */; };
 		5459D35B1FB6316200EE66D4 /* Parameter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5459D35A1FB6316200EE66D4 /* Parameter.swift */; };
 		545E030A1F9FD9CE008FDE18 /* FetchedResultsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 545E03091F9FD9CE008FDE18 /* FetchedResultsTableViewController.swift */; };
@@ -42,6 +43,7 @@
 		541134341F9FFC9600D67920 /* APIInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIInfo.swift; sourceTree = "<group>"; };
 		543C6D271FB258030000BC3E /* EditDeviceViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditDeviceViewController.swift; sourceTree = "<group>"; };
 		543F69FE1FD7240B00A6354F /* ConditionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConditionViewController.swift; sourceTree = "<group>"; };
+		543F6A001FD7619F00A6354F /* EditConditionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditConditionViewController.swift; sourceTree = "<group>"; };
 		544721051FA7961C000BC97D /* EditRoomViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditRoomViewController.swift; sourceTree = "<group>"; };
 		5459D35A1FB6316200EE66D4 /* Parameter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parameter.swift; sourceTree = "<group>"; };
 		545E03091F9FD9CE008FDE18 /* FetchedResultsTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchedResultsTableViewController.swift; sourceTree = "<group>"; };
@@ -106,6 +108,7 @@
 				54D02D7A1FBCED1400223675 /* EditActionViewController.swift */,
 				54F754CB1FD1F17000EB0AC4 /* ConditionsTableViewController.swift */,
 				543F69FE1FD7240B00A6354F /* ConditionViewController.swift */,
+				543F6A001FD7619F00A6354F /* EditConditionViewController.swift */,
 				5465AA2B1FA27879000E47CD /* APIInfoViewController.swift */,
 				54802C6A1F9E58E3005FF2C7 /* ViewController.swift */,
 				54FF29A21F9FDE3900584EB8 /* UIViewControllerUtilities.swift */,
@@ -252,6 +255,7 @@
 				54802C6B1F9E58E3005FF2C7 /* ViewController.swift in Sources */,
 				548437021FBBAFD6006F6AA9 /* ActionCommand.swift in Sources */,
 				5465AA2C1FA27879000E47CD /* APIInfoViewController.swift in Sources */,
+				543F6A011FD7619F00A6354F /* EditConditionViewController.swift in Sources */,
 				543F69FF1FD7240B00A6354F /* ConditionViewController.swift in Sources */,
 				548436FC1FBA2B3D006F6AA9 /* DeviceTableViewController.swift in Sources */,
 				541134351F9FFC9600D67920 /* APIInfo.swift in Sources */,

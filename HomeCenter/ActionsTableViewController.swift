@@ -187,7 +187,7 @@ class ActionsTableViewController: FetchedResultsTableViewController, UISplitView
                         context.rollback()
                         print("Error saving to API: \(error)")
                         DispatchQueue.main.async {
-                            self?.presentErrorAlert(withMessage: "Error Saving changes locally.")
+                            self?.presentErrorAlert(withMessage: "Error saving action.")
                         }
                     } else {
                         do {

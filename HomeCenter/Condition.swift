@@ -85,6 +85,44 @@ class Condition: NSManagedObject {
         }
     }
     
+    func saveToPI(with completionHandler: @escaping (Error?) -> Void) {
+        do {
+            if let conditionID = uuid, let conditionJson = try convertToJson() {
+                print("Should update condition: \(conditionJson)")
+                HomeFetcher.editContidion(with: conditionID, conditionData: conditionJson) { (retData, error) in
+                    if let error = error {
+                        completionHandler(error)
+                    } else if let _ = retData {
+                        print("Updated Succeeded")
+                        completionHandler(nil)
+                    } else {
+                        print("No error or data???")
+                        completionHandler(HomeFetcherError.DownloadError("No Data"))
+                    }
+                }
+            } else if let conditionJson = try convertToJson() {
+                HomeFetcher.addCondition(conditionJson, with: { [weak self] (conditionData, error) in
+                    if let error = error {
+                        completionHandler(error)
+                    } else if let conditionDict = conditionData {
+                        self?.managedObjectContext?.perform {
+                            print("Data: \(conditionDict)")
+                            self?.updateValues(with: conditionDict)
+                            print("")
+                            completionHandler(nil)
+                        }
+                    } else {
+                        print("No Error or data in Condition - savetoAPI?? new")
+                        completionHandler(HomeFetcherError.DownloadError("No Data"))
+                    }
+                })
+            }
+        } catch {
+            print("Error converting to Json: \(error)")
+            completionHandler(error)
+        }
+    }
+    
     // MARK: - Utility Methods
     
     func updateValues(with conditionData: [String: Any]) {
@@ -108,6 +146,26 @@ class Condition: NSManagedObject {
             action = a
         }
         tolerance = conditionData[JsonKeys.tolerance] as? String
+    }
+    
+    func convertToJson() throws -> String? {
+        var conditionDict: [String: Any] = [
+            JsonKeys.name: self.name ?? "",
+            JsonKeys.actionID: self.action?.uuid ?? "",
+            JsonKeys.paramID: self.parameter?.uuid ?? "",
+            JsonKeys.comparison: self.comparison ?? "=",
+            JsonKeys.type: self.comparisonType ?? ""
+        ]
+        if let type = comparisonType, type == "dynamic" {
+            conditionDict[JsonKeys.compParamID] = self.compParameter?.uuid ?? ""
+        } else {
+            conditionDict[JsonKeys.comparisonValue] = self.comparisonValue ?? ""
+        }
+        if self.tolerance != nil, self.tolerance! != "" {
+            conditionDict[JsonKeys.tolerance] = self.tolerance!
+        }
+        let jsonData = try JSONSerialization.data(withJSONObject: conditionDict, options: .prettyPrinted)
+        return String(data: jsonData, encoding: .utf8)
     }
     
     private struct JsonKeys {

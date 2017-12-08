@@ -143,6 +143,14 @@ class HomeFetcher: NSObject
         fetchArray(for: "/conditions", with: completionHandler)
     }
     
+    class func addCondition(_ conditionData: String, with completionHandler: @escaping ([String: Any]?, Error?) -> Void) {
+        sendRequest(withData: conditionData, toPath: "/conditions", withMethod: "POST", with: completionHandler)
+    }
+    
+    class func editContidion(with uuid: String, conditionData: String, with completionHandler: @escaping ([String: Any]?, Error?) -> Void) {
+        sendRequest(withData: conditionData, toPath: "/conditions/"+uuid, withMethod: "PATCH", with: completionHandler)
+    }
+    
     // MARK: - Helper Methods
     
     //expects object back, not an array

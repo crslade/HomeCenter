@@ -108,8 +108,8 @@ class Device: NSManagedObject
                     } else if let deviceDict = deviceData {
                         self?.managedObjectContext?.perform {
                             self?.updateValues(with: deviceDict)
+                            completionHandler(nil)
                         }
-                        completionHandler(nil)
                     } else {
                         print("No error or data in Device - savetoapi?? new")
                         completionHandler(HomeFetcherError.DownloadError("No Data"))

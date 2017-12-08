@@ -96,7 +96,7 @@ class ConditionsTableViewController: FetchedResultsTableViewController, UISplitV
     // MARK: - UITableViewDataSource
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: Storyboard.conditionCell, for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: Storyboard.ConditionCell, for: indexPath)
         
         if let condition = fetchedResultsController?.object(at: indexPath) {
             cell.textLabel?.text = condition.name ?? "<No Name>"
@@ -105,16 +105,72 @@ class ConditionsTableViewController: FetchedResultsTableViewController, UISplitV
         return cell
     }
     
+    override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+        let editAction = UITableViewRowAction(style: .default, title: "Edit") {[weak self] (rowAction, indexPath) in
+            self?.editRow(at: indexPath)
+        }
+        editAction.backgroundColor = .blue
+        
+        return [editAction]
+    }
+    
+    // MARK: - TableViewRowAction Handler Methods
+    
+    private func editRow(at indexPath: IndexPath) {
+        print("Edit Row")
+        if let condition = fetchedResultsController?.object(at: indexPath) {
+            performSegue(withIdentifier: Storyboard.AddEditConditionSegue, sender: condition)
+        }
+    }
+    
     // MARK: - Navigation
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == Storyboard.selectCondition, let dvc = segue.destination.contentViewController as? ConditionViewController {
+        if segue.identifier == Storyboard.SelectConditionSegue, let dvc = segue.destination.contentViewController as? ConditionViewController {
             if let cell = sender as? UITableViewCell, let indexPath = tableView?.indexPath(for: cell) {
                 dvc.condition = fetchedResultsController?.object(at: indexPath)
             }
         }
+        if segue.identifier == Storyboard.AddEditConditionSegue, let dvc = segue.destination.contentViewController as? EditConditionViewController {
+            if let condition = sender as? Condition {
+                dvc.condition = condition
+            } else if let context = container?.viewContext {
+                dvc.condition = Condition(context: context)
+            }
+        }
     }
 
+    @IBAction func cancelEditCondition(segue: UIStoryboardSegue) {
+        print("Cancel Edit Condition")
+        container?.viewContext.rollback()
+    }
+    
+    @IBAction func doneEditCondition(segue: UIStoryboardSegue) {
+        print("Done Edit Condition")
+        if let condition = (segue.source as? EditConditionViewController)?.condition, let context = condition.managedObjectContext {
+            condition.saveToPI() {[weak self] (error) in
+                context.perform {
+                    if let error = error {
+                        context.rollback()
+                        print("Error saveing to API: \(error)")
+                        DispatchQueue.main.async {
+                            self?.presentErrorAlert(withMessage: "Error saving condition.")
+                        }
+                    } else {
+                        do {
+                            try context.save()
+                        } catch {
+                            print("Error saving context: \(error)")
+                            DispatchQueue.main.async {
+                                self?.presentErrorAlert(withMessage: "Error saving changes locally.")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
     // MARK: - UISplitViewControllerDelegate
     
     func splitViewController(_ splitViewController: UISplitViewController, collapseSecondary secondaryViewController: UIViewController, onto primaryViewController: UIViewController) -> Bool {
@@ -122,8 +178,9 @@ class ConditionsTableViewController: FetchedResultsTableViewController, UISplitV
     }
 
     private struct Storyboard {
-        static let conditionCell = "Condition Cell"
-        static let selectCondition = "Show Condition"
+        static let ConditionCell = "Condition Cell"
+        static let SelectConditionSegue = "Show Condition"
+        static let AddEditConditionSegue = "Add Edit Condition"
     }
     
 }
