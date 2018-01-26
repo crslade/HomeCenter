@@ -59,6 +59,11 @@ class Action: NSManagedObject {
         return action
     }
     
+    // MARK: - Data
+    
+    //Can set this with Json Data when creating. If set, when converting to Json, this will be used instead of the commands array
+    var jsonCommands: [Any]?
+    
     // MARK: - Sync Methods
     
     class func syncActions(in context: NSManagedObjectContext, with completionHandler: @escaping (Error?) -> Void) {
@@ -118,6 +123,7 @@ class Action: NSManagedObject {
                 }
                 completionHandler(nil)
             } else if let actionJson = try convertToJson() {
+                print(actionJson)
                 HomeFetcher.addAction(actionJson) {[weak self] (actionData, error) in
                     if let error = error {
                         completionHandler(error)
@@ -171,6 +177,11 @@ class Action: NSManagedObject {
     
     // MARK: - Utility Methods
     
+    func applyJson(with actionData: [String: Any]) {
+        self.name = actionData[JsonKeys.name] as? String
+        self.jsonCommands = actionData[JsonKeys.commands] as? [Any]
+    }
+    
     func updateValues(with actionData: [String: Any]) {
         if uuid == nil {
             uuid = actionData[JsonKeys.uuid] as? String
@@ -212,7 +223,10 @@ class Action: NSManagedObject {
     
     private func convertToJson() throws -> String? {
         var commandArray: [Any] = []
-        if let commands = commands {
+        if let jsonCommands = jsonCommands {
+            print("here")
+            commandArray = jsonCommands
+        } else if let commands = commands {
             for command in commands {
                 if let command = command as? ActionCommand {
                     commandArray.append(command.convertToDict())

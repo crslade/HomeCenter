@@ -346,7 +346,6 @@ class EditConditionViewController: UIViewController, UITextFieldDelegate, UIPick
     
     // MARK: - UIPickerViewDataSource
     
-    
     private lazy var devices: [Device] = {
         var devices: [Device] = []
         if let context = manaagedObjectContext {

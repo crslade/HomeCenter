@@ -12,6 +12,7 @@
 		543F69FF1FD7240B00A6354F /* ConditionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 543F69FE1FD7240B00A6354F /* ConditionViewController.swift */; };
 		543F6A011FD7619F00A6354F /* EditConditionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 543F6A001FD7619F00A6354F /* EditConditionViewController.swift */; };
 		544721061FA7961C000BC97D /* EditRoomViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 544721051FA7961C000BC97D /* EditRoomViewController.swift */; };
+		544D67511FE481B000945F7B /* AddDeviceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 544D67501FE481B000945F7B /* AddDeviceViewController.swift */; };
 		5459D35B1FB6316200EE66D4 /* Parameter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5459D35A1FB6316200EE66D4 /* Parameter.swift */; };
 		545E030A1F9FD9CE008FDE18 /* FetchedResultsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 545E03091F9FD9CE008FDE18 /* FetchedResultsTableViewController.swift */; };
 		5465AA261FA10983000E47CD /* DevicesTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5465AA251FA10983000E47CD /* DevicesTableViewController.swift */; };
@@ -45,6 +46,7 @@
 		543F69FE1FD7240B00A6354F /* ConditionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConditionViewController.swift; sourceTree = "<group>"; };
 		543F6A001FD7619F00A6354F /* EditConditionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditConditionViewController.swift; sourceTree = "<group>"; };
 		544721051FA7961C000BC97D /* EditRoomViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditRoomViewController.swift; sourceTree = "<group>"; };
+		544D67501FE481B000945F7B /* AddDeviceViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddDeviceViewController.swift; sourceTree = "<group>"; };
 		5459D35A1FB6316200EE66D4 /* Parameter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parameter.swift; sourceTree = "<group>"; };
 		545E03091F9FD9CE008FDE18 /* FetchedResultsTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchedResultsTableViewController.swift; sourceTree = "<group>"; };
 		5465AA251FA10983000E47CD /* DevicesTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicesTableViewController.swift; sourceTree = "<group>"; };
@@ -100,6 +102,7 @@
 				54FF29A01F9FDBB500584EB8 /* RoomsTableViewController.swift */,
 				544721051FA7961C000BC97D /* EditRoomViewController.swift */,
 				5465AA251FA10983000E47CD /* DevicesTableViewController.swift */,
+				544D67501FE481B000945F7B /* AddDeviceViewController.swift */,
 				543C6D271FB258030000BC3E /* EditDeviceViewController.swift */,
 				548436FB1FBA2B3D006F6AA9 /* DeviceTableViewController.swift */,
 				548436F91FBA271A006F6AA9 /* ParameterTableViewCell.swift */,
@@ -111,6 +114,7 @@
 				543F6A001FD7619F00A6354F /* EditConditionViewController.swift */,
 				5465AA2B1FA27879000E47CD /* APIInfoViewController.swift */,
 				54802C6A1F9E58E3005FF2C7 /* ViewController.swift */,
+				545E03091F9FD9CE008FDE18 /* FetchedResultsTableViewController.swift */,
 				54FF29A21F9FDE3900584EB8 /* UIViewControllerUtilities.swift */,
 				54802C6C1F9E58E3005FF2C7 /* Main.storyboard */,
 			);
@@ -162,7 +166,6 @@
 				54802C821F9E6E8C005FF2C7 /* HomeFetcher.swift */,
 				5465AA291FA26E99000E47CD /* KeychainAccess.swift */,
 				54802C7A1F9E593B005FF2C7 /* HomeCenter.xcdatamodeld */,
-				545E03091F9FD9CE008FDE18 /* FetchedResultsTableViewController.swift */,
 				54802C801F9E69EA005FF2C7 /* Device.swift */,
 				54802C7D1F9E64C1005FF2C7 /* Room.swift */,
 				5459D35A1FB6316200EE66D4 /* Parameter.swift */,
@@ -261,6 +264,7 @@
 				541134351F9FFC9600D67920 /* APIInfo.swift in Sources */,
 				54FF29A31F9FDE3900584EB8 /* UIViewControllerUtilities.swift in Sources */,
 				543C6D281FB258030000BC3E /* EditDeviceViewController.swift in Sources */,
+				544D67511FE481B000945F7B /* AddDeviceViewController.swift in Sources */,
 				54802C7E1F9E64C1005FF2C7 /* Room.swift in Sources */,
 				54F754CC1FD1F17000EB0AC4 /* ConditionsTableViewController.swift in Sources */,
 				548437001FBB7BB7006F6AA9 /* Action.swift in Sources */,

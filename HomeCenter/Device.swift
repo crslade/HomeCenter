@@ -15,7 +15,6 @@ class Device: NSManagedObject
     var jsonUrl: String?
     var parameterData: [Any]?
 
-    var loadedProperties: Bool = false
     
     // MARK: - Initialization
     
@@ -174,7 +173,6 @@ class Device: NSManagedObject
                     self?.name = jsonDict[JsonKeys.name] as? String
                     self?.type = jsonDict[JsonKeys.type] as? String
                     self?.parameterData = jsonDict[JsonKeys.parameters] as? [Any]
-                    self?.loadedProperties = true
                     completionHandler(nil)
                 } else {
                     print("No Error or data??")
@@ -182,6 +180,12 @@ class Device: NSManagedObject
                 }
             }
         }
+    }
+    
+    func applyJsonProperties(with jsonDict: [String: Any]) {
+        self.name = jsonDict[JsonKeys.name] as? String
+        self.type = jsonDict[JsonKeys.type] as? String
+        self.parameterData = jsonDict[JsonKeys.parameters] as? [Any]
     }
     
     // MARK: - Utility Methods
@@ -248,6 +252,9 @@ class Device: NSManagedObject
         static let type = "deviceType"
         static let parameters = "parameters"
         static let updated = "updated_at"
+        static let devices = "devices"
+        static let actions = "actions"
+        static let conditions = "conditions"
     }
     
 }

@@ -192,6 +192,10 @@ class RoomsTableViewController: FetchedResultsTableViewController, UISplitViewCo
         }
     }
     
+    @IBAction func cancelFromInfo(segue: UIStoryboardSegue) {
+        print("Canceled")
+    }
+    
     @IBAction func cancelEditRoom(segue: UIStoryboardSegue) {
         print("Canceled Add/Edit")
         container?.viewContext.rollback()

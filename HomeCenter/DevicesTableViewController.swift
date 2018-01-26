@@ -137,7 +137,7 @@ class DevicesTableViewController: FetchedResultsTableViewController, UISplitView
     private func editRow(at indexPath: IndexPath) {
         print("Edit Row")
         if let device = fetchedResultsController?.object(at: indexPath) {
-            performSegue(withIdentifier: Storyboard.AddEditDeviceSegue, sender: device)
+            performSegue(withIdentifier: Storyboard.EditDeviceSegue, sender: device)
         }
     }
     
@@ -176,14 +176,15 @@ class DevicesTableViewController: FetchedResultsTableViewController, UISplitView
     
     private struct Storyboard {
         static let DeviceCell = "Device Cell"
-        static let AddEditDeviceSegue = "Add Edit Device"
+        static let EditDeviceSegue = "Edit Device"
         static let ShowDeviceSegue = "Show Device"
+        static let AddDeviceSegue = "Add Device"
     }
     
     // MARK: - Navigation
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == Storyboard.AddEditDeviceSegue, let dvc = segue.destination.contentViewController as? EditDeviceViewController {
+        if segue.identifier == Storyboard.EditDeviceSegue, let dvc = segue.destination.contentViewController as? EditDeviceViewController {
             if let device = sender as? Device {
                 dvc.device = device
             } else if let context = container?.viewContext {
@@ -198,6 +199,14 @@ class DevicesTableViewController: FetchedResultsTableViewController, UISplitView
                 dvc.device = fetchedResultsController?.object(at: indexPath)
             }
         }
+    }
+    
+    @IBAction func doneAddDevice(segue: UIStoryboardSegue) {
+        print("Done Adding Device")
+    }
+    
+    @IBAction func cancelAddDevice(segue: UIStoryboardSegue) {
+        print("Cancel Adding Device")
     }
     
     

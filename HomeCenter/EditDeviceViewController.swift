@@ -28,13 +28,6 @@ class EditDeviceViewController: UIViewController, UITextFieldDelegate, UIPickerV
         get { return device?.type ?? "" }
     }
     
-    var jsonUrl: String? {
-        get { return device?.jsonUrl ?? "" }
-        set {
-            device?.jsonUrl = newValue
-        }
-    }
-    
     var deviceRoom: Room? {
         get { return device?.room }
         set {
@@ -46,34 +39,17 @@ class EditDeviceViewController: UIViewController, UITextFieldDelegate, UIPickerV
     
     var paramCount: Int {
         get {
-            if self.isNew {
-                return device?.parameterData?.count ?? 0
-            } else {
                 return device?.parameters?.count ?? 0
-            }
-            
         }
     }
     
-    var isNew: Bool {
-        get {
-            if let _ = device?.uuid {
-                return false
-            } else {
-                return true
-            }
-        }
-    }
     
     
     // MARK: - Outlets
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var nameTextField: UITextField! { didSet { nameTextField?.delegate = self } }
-    @IBOutlet weak var jsonURLTextField: UITextField! { didSet { jsonURLTextField?.delegate = self } }
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
-    @IBOutlet weak var loadPropertiesControls: UIStackView!
     @IBOutlet weak var roomPicker: UIPickerView! { didSet { roomPicker?.dataSource = self; roomPicker?.delegate = self; roomPicker?.showsSelectionIndicator = true } }
-    @IBOutlet weak var editDeviceControls: UIStackView!
     @IBOutlet weak var deviceTypeLabel: UILabel!
     @IBOutlet weak var paramCountLabel: UILabel!
     @IBOutlet weak var doneButton: UIBarButtonItem!
@@ -121,25 +97,7 @@ class EditDeviceViewController: UIViewController, UITextFieldDelegate, UIPickerV
     
     private func updateUI() {
         print("Updating UI")
-        
-        //Set right title
-        if isNew {
-            self.navigationItem.title =  "Add Device"
-            jsonURLTextField?.text = jsonUrl
-        } else {
-            self.navigationItem.title =  "Edit Device"
-            device?.loadedProperties = true
-        }
-        //Show/Hide controls
-        if let dev = device, dev.loadedProperties {
-            loadPropertiesControls?.isHidden = true
-            editDeviceControls?.isHidden = false
-            doneButton?.isEnabled = true
-        } else if let _ = device {
-            doneButton?.isEnabled = false
-            loadPropertiesControls?.isHidden = false
-            editDeviceControls?.isHidden = true
-        }
+        self.navigationItem.title =  "Edit Device"
         //Update Labels and Fields
         nameTextField?.text = deviceName
         deviceTypeLabel?.text = deviceType
@@ -165,9 +123,6 @@ class EditDeviceViewController: UIViewController, UITextFieldDelegate, UIPickerV
         print("Ended Editing")
         if textField == nameTextField {
             deviceName = textField.text
-        }
-        if textField == jsonURLTextField {
-            jsonUrl = textField.text
         }
     }
     
@@ -205,33 +160,13 @@ class EditDeviceViewController: UIViewController, UITextFieldDelegate, UIPickerV
         return rooms.count+1
     }
     
-    // MARK: - Actions
-    
-    @IBAction func loadJson() {
-        self.activityIndicator?.startAnimating()
-        jsonUrl = self.jsonURLTextField?.text
-        device?.loadJsonProperties() {[weak self] (error) in
-            if let error = error {
-                print("Error getting data: \(error)")
-                DispatchQueue.main.async {
-                    self?.activityIndicator?.stopAnimating()
-                    self?.presentErrorAlert(withMessage: "Error Downloading Properties.")
-                }
-            } else {
-                DispatchQueue.main.async {
-                    self?.activityIndicator?.stopAnimating()
-                    self?.updateUI()
-                }
-            }
-        }
-    }
+
     
     // MARK: - Navigation
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == Storyboard.DoneEditSegue {
             deviceName = nameTextField?.text
-            jsonUrl = jsonURLTextField?.text
         }
     }
 

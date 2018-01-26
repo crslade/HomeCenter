@@ -12,8 +12,8 @@ class APIInfoViewController: UIViewController, UITextFieldDelegate {
 
     // MARK: - PublicAPI
     
-    var apiKey: String?
-    var apiUrl: String?
+    var apiKey: String? = KeychainAccess.retrieveAPIKey()
+    var apiUrl: String? = KeychainAccess.retrieveAPIUrl()
     
     
     // MARK: Outlets
